@@ -1,0 +1,10 @@
+<view class="container">
+  <view class="header"><text class="title">错题本</text><text class="count">共 {{wrongQuestions.length}} 题</text></view>
+  <view wx:if="{{wrongQuestions.length > 0}}" class="wrong-list">
+    <view wx:for="{{wrongQuestions}}" wx:key="id" class="wrong-item" data-id="{{item.id}}" bindtap="goPractice">
+      <view class="question-brief">{{item.content}}</view>
+      <view class="question-info"><text>{{item.subject}}</text><text>{{item.type}}</text></view>
+    </view>
+  </view>
+  <view wx:elif="{{!loading}}" class="empty-state"><text>暂无错题，继续保持！</text></view>
+</view>

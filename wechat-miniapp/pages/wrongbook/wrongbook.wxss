@@ -1,0 +1,8 @@
+.header { display: flex; justify-content: space-between; align-items: center; padding: 30rpx; background: #fff; }
+.title { font-size: 36rpx; font-weight: bold; }
+.count { font-size: 28rpx; color: #999; }
+.wrong-list { padding: 20rpx; }
+.wrong-item { background: #fff; border-radius: 16rpx; padding: 24rpx; margin-bottom: 20rpx; }
+.question-brief { font-size: 30rpx; line-height: 1.6; margin-bottom: 16rpx; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.question-info { display: flex; gap: 20rpx; font-size: 24rpx; color: #999; }
+.empty-state { text-align: center; padding: 100rpx; color: #999; }

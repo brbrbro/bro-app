@@ -1,0 +1,24 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/practice/practice",
+    "pages/wrongbook/wrongbook",
+    "pages/share/share",
+    "pages/profile/profile",
+    "pages/sync/sync",
+    "pages/import/import"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#4A90D9",
+    "navigationBarTitleText": "BRO",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "custom": true,
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/practice/practice", "text": "练习" }
+    ]
+  }
+}

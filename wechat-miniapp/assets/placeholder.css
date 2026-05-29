@@ -1,0 +1,37 @@
+/* 默认头像占位 */
+.avatar-small,
+.avatar-large {
+  background: linear-gradient(135deg, #4A90D9, #6BA8E8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-small::before,
+.avatar-large::before {
+  content: '👤';
+  font-size: inherit;
+}
+
+/* 菜单图标占位 */
+.menu-icon {
+  background: #f0f0f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 会员图标占位 */
+.member-icon {
+  background: #FFD700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-icon::before {
+  content: '👑';
+  font-size: 24rpx;
+}

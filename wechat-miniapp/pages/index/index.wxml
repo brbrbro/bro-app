@@ -1,0 +1,256 @@
+<view class="container">
+  <!-- 小程序名称栏 -->
+  <view class="app-title-bar" style="padding-top: {{statusBarHeight}}px;">
+    <text class="app-title">Bro App</text>
+  </view>
+  
+  <!-- 顶部状态栏 -->
+  <view class="status-bar">
+    <view class="avatar-wrapper" bindtap="toggleProfile">
+      <view class="avatar-small">{{userInfo && userInfo.nickname ? userInfo.nickname[0] : '👤'}}</view>
+    </view>
+    
+    <view class="status-center" bindtap="toggleSelector">
+      <text class="current-mode">{{selectedSubject ? (region === 'mainland' ? t.gaokao : t.dse) + '-' + selectedSubject : '请选择科目'}}</text>
+      <text class="dropdown-arrow">▼</text>
+    </view>
+    
+    <view class="menu-btn" bindtap="toggleMenu">
+      <view class="hamburger">
+        <view class="line"></view>
+        <view class="line"></view>
+        <view class="line"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 选择器下拉面板 -->
+  <view class="selector-overlay {{showSelector ? 'show' : ''}}" bindtap="toggleSelector"></view>
+  <view class="selector-panel {{showSelector ? 'show' : ''}}">
+    <view class="selector-title">{{t.selectExamSubject}}</view>
+    
+    <view class="region-switch">
+      <view class="region-item {{region === 'mainland' ? 'active' : ''}}" data-region="mainland" bindtap="switchRegion">{{t.gaokao}}</view>
+      <view class="region-item {{region === 'hk' ? 'active' : ''}}" data-region="hk" bindtap="switchRegion">{{t.dse}}</view>
+    </view>
+
+    <view class="subject-list">
+      <view 
+        wx:for="{{subjects}}" 
+        wx:key="index" 
+        class="subject-item {{selectedSubject === item ? 'selected' : ''}}" 
+        data-subject="{{item}}" 
+        bindtap="selectSubject"
+      >{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 个人中心侧滑面板（从左侧展开） -->
+  <view class="profile-overlay {{profileOpen ? 'show' : ''}}" bindtap="closeProfile"></view>
+  
+  <view class="profile-panel {{profileOpen ? 'open' : ''}}">
+    <!-- 用户信息区 -->
+    <view class="profile-header">
+      <view class="avatar-large">{{userInfo && userInfo.nickname ? userInfo.nickname[0] : '👤'}}</view>
+      
+      <view class="user-info">
+        <view class="user-name-row">
+          <text class="user-name">{{userInfo && userInfo.nickname ? userInfo.nickname : t.guest}}</text>
+          <view class="member-badge {{isMember ? 'premium' : 'normal'}}">
+            {{isMember ? '👑' : '👤'}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 等级和经验 -->
+    <view class="level-section">
+      <view class="level-info">
+        <text class="level-text">{{t.level}} {{userLevel}}</text>
+        <text class="exp-text">{{userExp}}/{{maxExp}} {{t.exp}}</text>
+      </view>
+      <view class="exp-bar">
+        <view class="exp-progress" style="width: {{(userExp / maxExp) * 100}}%"></view>
+      </view>
+    </view>
+
+    <!-- 积分和签到 -->
+    <view class="points-section">
+      <view class="points-display">
+        <text class="points-label">{{t.points}}</text>
+        <text class="points-value">{{userPoints}}</text>
+      </view>
+      <view 
+        class="sign-in-btn {{hasSignedIn ? 'signed' : ''}}" 
+        bindtap="signIn"
+      >
+        {{hasSignedIn ? t.signedIn : t.signIn}}
+      </view>
+    </view>
+
+    <!-- 菜单列表 -->
+    <view class="menu-list">
+      <view class="menu-item" bindtap="goMyStats">
+        <view class="menu-icon-text">📊</view>
+        <text class="menu-text">{{t.myStats}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="goMyQuestions">
+        <view class="menu-icon-text">📝</view>
+        <text class="menu-text">{{t.myQuestions}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="goMyBag">
+        <view class="menu-icon-text">🎒</view>
+        <text class="menu-text">{{t.myBag}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="goMyClassmates">
+        <view class="menu-icon-text">👥</view>
+        <text class="menu-text">{{t.myClassmates}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="goInvite">
+        <view class="menu-icon-text">📧</view>
+        <text class="menu-text">{{t.inviteClassmates}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="goMyMembership">
+        <view class="menu-icon-text">💎</view>
+        <text class="menu-text">{{t.myMembership}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 右侧菜单面板（从右侧展开） -->
+  <view class="menu-overlay {{menuOpen ? 'show' : ''}}" bindtap="closeMenu"></view>
+  
+  <view class="right-menu-panel {{menuOpen ? 'open' : ''}}">
+    <view class="menu-header">
+      <text class="menu-title">{{t.menu}}</text>
+      <view class="close-btn" bindtap="closeMenu">✕</view>
+    </view>
+
+    <view class="menu-list">
+      <view class="menu-item" bindtap="goNotifications">
+        <view class="menu-icon-text">🔔</view>
+        <text class="menu-text">{{t.notifications}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="goDifficulty">
+        <view class="menu-icon-text">📊</view>
+        <text class="menu-text">{{t.difficultyPreference}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="goScan">
+        <view class="menu-icon-text">📷</view>
+        <text class="menu-text">{{t.scan}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="switchLanguage">
+        <view class="menu-icon-text">🌐</view>
+        <view class="menu-text-wrapper">
+          <text class="menu-text">{{t.language}}</text>
+          <text class="menu-subtext">{{currentLanguageLabel}}</text>
+        </view>
+        <text class="menu-arrow">></text>
+      </view>
+      
+      <view class="menu-item" bindtap="goSettings">
+        <view class="menu-icon-text">⚙️</view>
+        <text class="menu-text">{{t.settings}}</text>
+        <text class="menu-arrow">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 语言选择器弹窗 -->
+  <view class="language-overlay {{showLanguagePicker ? 'show' : ''}}" bindtap="closeLanguagePicker"></view>
+  <view class="language-panel {{showLanguagePicker ? 'show' : ''}}">
+    <view class="language-header">
+      <text class="language-title">{{t.language}}</text>
+      <view class="close-btn" bindtap="closeLanguagePicker">✕</view>
+    </view>
+    
+    <view class="language-list">
+      <view 
+        wx:for="{{languages}}" 
+        wx:key="key"
+        class="language-item {{currentLanguage === item.key ? 'selected' : ''}}"
+        data-lang="{{item.key}}"
+        bindtap="selectLanguage"
+      >
+        <text class="language-label">{{item.label}}</text>
+        <text wx:if="{{currentLanguage === item.key}}" class="language-check">✓</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主内容区 - 六大功能按钮 -->
+  <view class="main-content">
+    <view class="grid-container">
+      <view class="grid-row">
+        <view class="grid-btn btn-blue" bindtap="goQuestionBank">
+          <text class="btn-icon">📚</text>
+          <text class="btn-label">题库</text>
+        </view>
+        <view class="grid-btn btn-red" bindtap="goDailyChallenge">
+          <text class="btn-icon">🔥</text>
+          <text class="btn-label">每日挑战</text>
+        </view>
+      </view>
+      
+      <view class="grid-row">
+        <view class="grid-btn btn-green" bindtap="goCreateQuestion">
+          <text class="btn-icon">✏️</text>
+          <text class="btn-label">我要出题</text>
+        </view>
+        <view class="grid-btn btn-orange" bindtap="goWrongBook">
+          <text class="btn-icon">❌</text>
+          <text class="btn-label">错题本</text>
+        </view>
+      </view>
+      
+      <view class="grid-row">
+        <view class="grid-btn btn-purple" bindtap="goLeaderboard">
+          <text class="btn-icon">🏆</text>
+          <text class="btn-label">排行榜</text>
+        </view>
+        <view class="grid-btn btn-teal" bindtap="goPointsShop">
+          <text class="btn-icon">🛒</text>
+          <text class="btn-label">积分商城</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 自定义底部导航栏 -->
+  <view class="custom-tab-bar">
+    <view class="tab-bar-bg">
+      <view class="tab-left" bindtap="goSquare">
+        <text class="tab-icon">🏛️</text>
+        <text class="tab-text">广场</text>
+      </view>
+      <view class="tab-center-placeholder"></view>
+      <view class="tab-right" bindtap="goStudyRoom">
+        <text class="tab-icon">📖</text>
+        <text class="tab-text">自习室</text>
+      </view>
+    </view>
+    <view class="tab-center-btn" bindtap="goPracticePage">
+      <view class="center-circle">
+        <text class="center-icon">✏️</text>
+        <text class="center-text">做题</text>
+      </view>
+    </view>
+  </view>
+</view>

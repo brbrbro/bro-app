@@ -1,0 +1,9 @@
+<view class="container">
+  <view class="sync-info"><text class="label">上次同步：</text><text class="value">{{lastSyncTime ? lastSyncTime : '从未同步'}}</text></view>
+  <view class="sync-info"><text class="label">本地数据：</text><text class="value">{{localCount}} 条</text></view>
+  <view class="sync-buttons">
+    <button bindtap="uploadToCloud" loading="{{syncStatus === 'uploading'}}">上传至云端</button>
+    <button bindtap="downloadFromCloud" loading="{{syncStatus === 'downloading'}}">从云端下载</button>
+  </view>
+  <view class="sync-tip"><text>提示：数据将在您确认后进行同步</text></view>
+</view>

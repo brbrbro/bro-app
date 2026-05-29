@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>BRO 管理后台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, sans-serif; background: #f5f5f5; }
+    .header { background: #4A90D9; color: #fff; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab { padding: 10px 20px; cursor: pointer; background: #fff; border-radius: 8px; }
+    .tab.active { background: #4A90D9; color: #fff; }
+    .card { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+    .item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #f5f5f5; }
+    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-approve { background: #52C41A; color: #fff; }
+    .btn-reject { background: #FF4D4F; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="header"><h1>BRO 管理后台</h1></div>
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" data-tab="ugc">UGC 内容</div>
+      <div class="tab" data-tab="questions">题库审核</div>
+    </div>
+    <div id="content"></div>
+  </div>
+  <script>
+    const API_BASE = 'http://106.53.188.248:5001/api';
+    async function loadUGC() {
+      const res = await fetch(`${API_BASE}/admin/ugc?status=pending_review`);
+      const data = await res.json();
+      renderList(data.items);
+    }
+    function renderList(items) {
+      const content = document.getElementById('content');
+      content.innerHTML = items.map(item => `<div class="card"><div class="item"><div><strong>${item.type}</strong><p>${item.content.substring(0, 100)}...</p><small>${item.created_at}</small></div><div><button class="btn btn-approve" onclick="approve(${item.id})">通过</button><button class="btn btn-reject" onclick="reject(${item.id})">拒绝</button></div></div></div>`).join('');
+    }
+    async function approve(id) { await fetch(`${API_BASE}/admin/ugc/${id}/review`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'approved' }) }); loadUGC(); }
+    async function reject(id) { await fetch(`${API_BASE}/admin/ugc/${id}/review`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected' }) }); loadUGC(); }
+    loadUGC();
+  </script>
+</body>
+</html>

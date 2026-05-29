@@ -1,0 +1,6 @@
+.post-btn { background: #4A90D9; color: #fff; margin: 20rpx; }
+.share-list { padding: 20rpx; }
+.share-card { background: #fff; border-radius: 16rpx; padding: 24rpx; margin-bottom: 20rpx; }
+.share-user { font-weight: bold; margin-bottom: 10rpx; }
+.share-content { font-size: 30rpx; line-height: 1.6; margin-bottom: 16rpx; }
+.share-meta { font-size: 24rpx; color: #999; }

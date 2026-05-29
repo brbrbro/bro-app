@@ -1,0 +1,66 @@
+﻿<view class="container">
+  <!-- 考试体系选择 -->
+  <view class="section-title">选择考试体系 <text class="required">*</text></view>
+  <view class="exam-type-list">
+    <view 
+      wx:for="{{examTypes}}" 
+      wx:key="key"
+      class="exam-type-item {{selectedExamType === item.key ? 'selected' : ''}}"
+      data-type="{{item.key}}"
+      bindtap="selectExamType"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 科目选择 -->
+  <view class="section-title">选择科目 <text class="required">*</text></view>
+  <view class="subject-list">
+    <view 
+      wx:for="{{subjects}}" 
+      wx:key="index"
+      class="subject-item {{selectedSubject === item ? 'selected' : ''}}"
+      data-subject="{{item}}"
+      bindtap="selectSubject"
+    >{{item}}</view>
+  </view>
+
+  <!-- 年级选择 -->
+  <view class="section-title">选择年级 <text class="optional">(可选)</text></view>
+  <picker mode="selector" range="{{grades}}" bindchange="onGradeChange" disabled="{{grades.length === 0}}">
+    <view class="picker {{selectedGrade ? 'selected' : ''}} {{grades.length === 0 ? 'disabled' : ''}}">
+      {{selectedGrade || (grades.length === 0 ? '请先选择考试体系' : '请选择年级')}}
+      <text class="arrow">▼</text>
+    </view>
+  </picker>
+
+  <!-- 知识点选择 -->
+  <view class="section-title">选择知识点 <text class="optional">(可选)</text></view>
+  <picker mode="selector" range="{{knowledgePoints}}" bindchange="onKnowledgePointChange">
+    <view class="picker {{selectedKnowledgePoint !== '不详' ? 'selected' : ''}}">
+      {{selectedKnowledgePoint}}
+      <text class="arrow">▼</text>
+    </view>
+  </picker>
+
+  <!-- 上传区域 -->
+  <view class="section-title">上传题目图片</view>
+  <view class="upload-area" bindtap="chooseImage">
+    <view wx:if="{{!tempImagePath}}" class="upload-placeholder">
+      <text class="icon">+</text>
+      <text>点击拍照或从相册选择</text>
+      <text class="hint">支持 JPG/PNG 格式</text>
+    </view>
+    <image wx:else src="{{tempImagePath}}" mode="aspectFit" class="preview-image" />
+  </view>
+
+  <view wx:if="{{uploading}}" class="uploading-mask">
+    <view class="loading">AI 识别中...</view>
+  </view>
+
+  <view class="tips">
+    <text>提示：</text>
+    <text>1. 请确保图片清晰，文字可辨认</text>
+    <text>2. 一次建议只拍摄一道题目</text>
+    <text>3. 考试体系和科目为必填项</text>
+    <text>4. 提交后需管理员审核才会入库</text>
+  </view>
+</view>

@@ -1,0 +1,10 @@
+<view class="container">
+  <button class="post-btn" bindtap="goPost">发布笔记</button>
+  <view class="share-list">
+    <view wx:for="{{shares}}" wx:key="id" class="share-card" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="share-user">{{item.user_nickname}}</view>
+      <view class="share-content">{{item.content}}</view>
+      <view class="share-meta">{{item.like_count}} 赞 | {{item.comment_count}} 评论</view>
+    </view>
+  </view>
+</view>
