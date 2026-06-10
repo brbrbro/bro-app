@@ -1,0 +1,17 @@
+.container { background: #f5f5f5; min-height: 100vh; }
+.tabs { display: flex; background: #fff; }
+.tab { flex: 1; padding: 28rpx 0; text-align: center; font-size: 28rpx; color: #666; }
+.tab.active { color: #9B59B6; font-weight: bold; border-bottom: 4rpx solid #9B59B6; }
+.loading, .empty { text-align: center; padding: 200rpx 0; color: #999; }
+.rank-list { padding: 20rpx; }
+.rank-item { display: flex; align-items: center; gap: 20rpx; background: #fff; padding: 20rpx 24rpx; border-radius: 16rpx; margin-bottom: 16rpx; }
+.rank-item.rank-1 { background: linear-gradient(135deg, #FFD700, #FFE57F); }
+.rank-item.rank-2 { background: linear-gradient(135deg, #C0C0C0, #E0E0E0); }
+.rank-item.rank-3 { background: linear-gradient(135deg, #CD7F32, #D9A06B); }
+.rank-num { width: 60rpx; text-align: center; font-size: 36rpx; font-weight: bold; color: #999; }
+.rank-item.rank-1 .rank-num, .rank-item.rank-2 .rank-num, .rank-item.rank-3 .rank-num { color: #fff; }
+.rank-avatar { width: 70rpx; height: 70rpx; border-radius: 50%; background: linear-gradient(135deg, #4A90D9, #6BA8E8); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 30rpx; }
+.rank-name { flex: 1; font-size: 30rpx; color: #333; }
+.rank-item.rank-1 .rank-name, .rank-item.rank-2 .rank-name, .rank-item.rank-3 .rank-name { color: #fff; font-weight: bold; }
+.rank-score { font-size: 32rpx; font-weight: bold; color: #9B59B6; }
+.rank-item.rank-1 .rank-score, .rank-item.rank-2 .rank-score, .rank-item.rank-3 .rank-score { color: #fff; }

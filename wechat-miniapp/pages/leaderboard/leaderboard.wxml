@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="tabs">
+    <view class="tab {{metric === 'correct' ? 'active' : ''}}" data-metric="correct" bindtap="switchMetric">答对排行</view>
+    <view class="tab {{metric === 'total' ? 'active' : ''}}" data-metric="total" bindtap="switchMetric">答题排行</view>
+  </view>
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+  <view wx:elif="{{ranking.length > 0}}" class="rank-list">
+    <view wx:for="{{ranking}}" wx:key="user_id" class="rank-item rank-{{item.rank <= 3 ? item.rank : 'normal'}}">
+      <view class="rank-num">{{item.rank}}</view>
+      <view class="rank-avatar">{{item.nickname[0] || '👤'}}</view>
+      <view class="rank-name">{{item.nickname}}</view>
+      <view class="rank-score">{{item.score}}</view>
+    </view>
+  </view>
+  <view wx:else class="empty">还没有排行数据</view>
+</view>

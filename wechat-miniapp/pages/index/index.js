@@ -258,7 +258,7 @@ Page({
   },
   
   goLeaderboard() {
-    wx.showToast({ title: '排行榜', icon: 'none' });
+    wx.navigateTo({ url: '/pages/leaderboard/leaderboard' });
   },
   
   goPointsShop() {

@@ -34,5 +34,6 @@ module.exports = {
   getStats: () => request('/progress/stats'),
   getProfile: () => request('/users/profile'),
   updateProfile: (data) => request('/users/profile', 'PUT', data),
-  getMyQuestions: (params) => request('/import/my-questions', 'GET', params)
+  getMyQuestions: (params) => request('/import/my-questions', 'GET', params),
+  getLeaderboard: (params) => request('/leaderboard', 'GET', params)
 };
