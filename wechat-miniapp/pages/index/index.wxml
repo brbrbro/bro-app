@@ -81,6 +81,12 @@
         <text class="points-value">{{userPoints}}</text>
       </view>
       <view 
+        class="shop-icon-btn" 
+        bindtap="goPointsShop"
+      >
+        🛒
+      </view>
+      <view 
         class="sign-in-btn {{hasSignedIn ? 'signed' : ''}}" 
         bindtap="signIn"
       >
@@ -225,9 +231,9 @@
           <text class="btn-icon">🏆</text>
           <text class="btn-label">排行榜</text>
         </view>
-        <view class="grid-btn btn-teal" bindtap="goPointsShop">
-          <text class="btn-icon">🛒</text>
-          <text class="btn-label">积分商城</text>
+        <view class="grid-btn btn-teal" bindtap="goLiCiTong">
+          <text class="btn-icon">📖</text>
+          <text class="btn-label">理词通</text>
         </view>
       </view>
     </view>

@@ -295,6 +295,7 @@
 .points-display {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .points-label {
@@ -315,6 +316,20 @@
   border-radius: 40rpx;
   font-size: 28rpx;
   border: none;
+  white-space: nowrap;
+}
+
+.shop-icon-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  background: #f0f0f0;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin: 0 12rpx;
 }
 
 .sign-in-btn.signed {
