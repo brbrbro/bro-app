@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="hero">
+    <view class="hero-icon">🎁</view>
+    <view class="hero-title">邀请同学一起刷题</view>
+    <view class="hero-desc">每邀请一位同学，双方都得 50 积分</view>
+  </view>
+  <view class="code-card">
+    <view class="code-label">我的邀请码</view>
+    <view class="code-value">{{inviteCode}}</view>
+    <button class="copy-btn" bindtap="copyCode">复制邀请码</button>
+  </view>
+  <view class="text-card">
+    <view class="text-label">邀请文案</view>
+    <view class="text-value">{{inviteText}}</view>
+    <button class="copy-btn" bindtap="copyText">复制文案</button>
+  </view>
+  <button class="share-btn" open-type="share">分享给微信好友</button>
+</view>
