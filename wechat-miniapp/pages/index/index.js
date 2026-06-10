@@ -237,7 +237,7 @@ Page({
   },
 
   goSettings() {
-    wx.showToast({ title: '系统设置', icon: 'none' });
+    wx.navigateTo({ url: '/pages/settings/settings' });
   },
 
   // 六大功能按钮

@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="section">
+    <view class="item" bindtap="clearCache">
+      <text class="item-label">清理缓存</text>
+      <text class="item-arrow">></text>
+    </view>
+    <view class="item" bindtap="about">
+      <text class="item-label">关于 BRO</text>
+      <text class="item-sub">v{{version}}</text>
+      <text class="item-arrow">></text>
+    </view>
+    <view class="item" bindtap="contact">
+      <text class="item-label">联系我们</text>
+      <text class="item-arrow">></text>
+    </view>
+  </view>
+  <view wx:if="{{isLoggedIn}}" class="section">
+    <view class="item danger" bindtap="logout">
+      <text class="item-label">退出登录</text>
+    </view>
+  </view>
+</view>
