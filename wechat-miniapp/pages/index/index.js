@@ -262,7 +262,7 @@ Page({
   },
   
   goPointsShop() {
-    wx.showToast({ title: '积分商城', icon: 'none' });
+    wx.navigateTo({ url: '/pages/points-shop/points-shop' });
   },
 
   goLiCiTong() {

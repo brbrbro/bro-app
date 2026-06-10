@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="balance">
+    <text class="bal-label">我的积分</text>
+    <text class="bal-value">{{userPoints}}</text>
+  </view>
+  <view class="grid">
+    <view wx:for="{{items}}" wx:key="id" class="item-card" data-id="{{item.id}}" bindtap="redeem">
+      <view class="item-icon">{{item.icon}}</view>
+      <view class="item-name">{{item.name}}</view>
+      <view class="item-cost">{{item.cost}} 积分</view>
+    </view>
+  </view>
+</view>
