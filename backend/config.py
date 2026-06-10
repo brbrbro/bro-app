@@ -3,7 +3,7 @@ from datetime import timedelta
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'bro-dev-secret-2026'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/bro.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///C:/bro-dev/bro.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'bro-jwt-secret-change-later'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
