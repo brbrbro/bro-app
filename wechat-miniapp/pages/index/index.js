@@ -246,7 +246,7 @@ Page({
   },
   
   goDailyChallenge() {
-    wx.showToast({ title: '每日挑战', icon: 'none' });
+    wx.navigateTo({ url: '/pages/daily-challenge/daily-challenge' });
   },
   
   goCreateQuestion() {
@@ -263,6 +263,10 @@ Page({
   
   goPointsShop() {
     wx.showToast({ title: '积分商城', icon: 'none' });
+  },
+
+  goLiCiTong() {
+    wx.showToast({ title: '理词通', icon: 'none' });
   },
 
   // 底部导航栏按钮

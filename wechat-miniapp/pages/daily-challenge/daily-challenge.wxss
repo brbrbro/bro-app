@@ -1,0 +1,15 @@
+.container { background: #f5f5f5; min-height: 100vh; padding-bottom: 60rpx; }
+.hero { background: linear-gradient(135deg, #E74C3C, #FF6B6B); padding: 60rpx 30rpx; text-align: center; color: #fff; }
+.hero-flame { font-size: 120rpx; }
+.hero-title { font-size: 40rpx; font-weight: bold; margin-top: 16rpx; }
+.hero-date { font-size: 26rpx; opacity: 0.9; margin-top: 10rpx; }
+.hero-bonus { display: inline-block; margin-top: 20rpx; padding: 8rpx 24rpx; background: rgba(255,255,255,0.25); border-radius: 30rpx; font-size: 24rpx; }
+.loading, .empty { text-align: center; padding: 100rpx 0; color: #999; }
+.done-card { margin: 40rpx 30rpx; background: #fff; border-radius: 16rpx; padding: 60rpx 30rpx; text-align: center; }
+.done-icon { font-size: 100rpx; }
+.done-title { font-size: 32rpx; font-weight: bold; margin-top: 20rpx; color: #333; }
+.done-desc { font-size: 26rpx; color: #999; margin-top: 12rpx; }
+.question-card { margin: 30rpx; background: #fff; border-radius: 16rpx; padding: 30rpx; }
+.q-type { display: inline-block; padding: 6rpx 16rpx; background: #FFEBEE; color: #E74C3C; border-radius: 20rpx; font-size: 22rpx; margin-bottom: 16rpx; }
+.q-content { font-size: 30rpx; color: #333; line-height: 1.8; }
+.answer-btn { margin: 30rpx; background: #E74C3C; color: #fff; border-radius: 50rpx; font-size: 32rpx; font-weight: bold; }

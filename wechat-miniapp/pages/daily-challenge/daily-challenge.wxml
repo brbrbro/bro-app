@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="hero">
+    <view class="hero-flame">🔥</view>
+    <view class="hero-title">每日挑战</view>
+    <view class="hero-date">{{todayDate}}</view>
+    <view class="hero-bonus">答对得 2 倍积分</view>
+  </view>
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+  <view wx:elif="{{alreadyDone}}" class="done-card">
+    <view class="done-icon">✅</view>
+    <view class="done-title">今日挑战已完成</view>
+    <view class="done-desc">明天再来吧</view>
+  </view>
+  <block wx:elif="{{question}}">
+    <view class="question-card">
+      <view class="q-type">{{question.type === 'choice' ? '选择题' : question.type === 'blank' ? '填空题' : '解答题'}}</view>
+      <view class="q-content">{{question.content}}</view>
+    </view>
+    <button class="answer-btn" bindtap="goAnswer">开始答题</button>
+  </block>
+  <view wx:else class="empty">题库为空，请先导入题目</view>
+</view>
