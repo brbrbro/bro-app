@@ -35,5 +35,8 @@ module.exports = {
   getProfile: () => request('/users/profile'),
   updateProfile: (data) => request('/users/profile', 'PUT', data),
   getMyQuestions: (params) => request('/import/my-questions', 'GET', params),
-  getLeaderboard: (params) => request('/leaderboard', 'GET', params)
+  getLeaderboard: (params) => request('/leaderboard', 'GET', params),
+  getCheckinStatus: () => request('/checkin/today'),
+  doCheckin: () => request('/checkin', 'POST'),
+  getCheckinHistory: () => request('/checkin/history')
 };

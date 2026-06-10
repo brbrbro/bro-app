@@ -103,16 +103,34 @@ Page({
   loadUserData() {
     const userInfo = auth.getUserInfo();
     const isLoggedIn = auth.isLoggedIn();
-    
+
     this.setData({
       userInfo,
       isLoggedIn,
-      userLevel: isLoggedIn ? 5 : 1,
-      userExp: isLoggedIn ? 75 : 0,
+      userLevel: isLoggedIn ? 1 : 1,
+      userExp: 0,
       maxExp: 100,
-      userPoints: isLoggedIn ? 1280 : 0,
+      userPoints: 0,
       isMember: isLoggedIn && userInfo && userInfo.member_type === 'premium'
     });
+
+    if (!isLoggedIn) return;
+
+    const api = require('../../utils/api.js');
+    api.getProfile()
+      .then(profile => {
+        this.setData({
+          userLevel: profile.level || 1,
+          userExp: profile.exp || 0,
+          userPoints: profile.points || 0,
+          isMember: profile.member_type === 'premium'
+        });
+      })
+      .catch(() => {});
+
+    api.getCheckinStatus()
+      .then(s => this.setData({ hasSignedIn: s.already_checked }))
+      .catch(() => {});
   },
 
   // 个人中心展开/收起
@@ -156,20 +174,29 @@ Page({
       wx.showToast({ title: '今日已签到', icon: 'none' });
       return;
     }
-    
-    const newPoints = this.data.userPoints + 10;
-    const newExp = this.data.userExp + 5;
-    
-    this.setData({
-      userPoints: newPoints,
-      userExp: newExp,
-      hasSignedIn: true
-    });
-    
-    wx.showToast({
-      title: '签到成功 +10积分',
-      icon: 'success'
-    });
+    if (!auth.isLoggedIn()) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    const api = require('../../utils/api.js');
+    api.doCheckin()
+      .then(res => {
+        this.setData({
+          userPoints: res.total_points,
+          userExp: res.exp,
+          userLevel: res.level,
+          hasSignedIn: true
+        });
+        wx.showToast({ title: `签到+${res.points_awarded}积分`, icon: 'success' });
+      })
+      .catch(err => {
+        if (err && err.error === 'already_checked') {
+          this.setData({ hasSignedIn: true });
+          wx.showToast({ title: '今日已签到', icon: 'none' });
+        } else {
+          wx.showToast({ title: '签到失败', icon: 'none' });
+        }
+      });
   },
 
   // 导航到各页面
