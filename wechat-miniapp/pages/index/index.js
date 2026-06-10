@@ -266,7 +266,7 @@ Page({
   },
 
   goLiCiTong() {
-    wx.showToast({ title: '理词通', icon: 'none' });
+    wx.navigateTo({ url: '/pages/licitong/licitong' });
   },
 
   // 底部导航栏按钮

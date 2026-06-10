@@ -1,0 +1,17 @@
+<view class="container">
+  <view class="progress">{{index + 1}} / {{cards.length}}</view>
+  <view class="card {{showAnswer ? 'flipped' : ''}}" bindtap="flip">
+    <view wx:if="{{!showAnswer}}" class="card-front">
+      <view class="card-word">{{cards[index].word}}</view>
+      <view class="card-hint">点击查看释义</view>
+    </view>
+    <view wx:else class="card-back">
+      <view class="card-def">{{cards[index].def}}</view>
+      <view class="card-ex">例：{{cards[index].example}}</view>
+    </view>
+  </view>
+  <view class="actions">
+    <button class="act-btn" bindtap="prev" disabled="{{index === 0}}">上一个</button>
+    <button class="act-btn primary" bindtap="next">下一个</button>
+  </view>
+</view>
