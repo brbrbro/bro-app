@@ -5,7 +5,7 @@ App({
     userInfo: null,
     token: null,
     region: 'mainland',
-    apiBase: 'http://106.53.188.248/api'
+    apiBase: 'http://127.0.0.1:5001/api'
   },
   onLaunch() {
     // Try auto-login with longer timeout
