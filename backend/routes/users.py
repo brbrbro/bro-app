@@ -86,6 +86,9 @@ def get_profile():
         'region': user.region,
         'member_type': user.member_type,
         'gold': user.gold,
+        'points': user.points or 0,
+        'exp': user.exp or 0,
+        'level': user.level or 1,
         'created_at': user.created_at.isoformat()
     })
 
