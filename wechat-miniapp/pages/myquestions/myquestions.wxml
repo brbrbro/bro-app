@@ -1,0 +1,23 @@
+<view class="container">
+  <view wx:if="{{!isLoggedIn}}" class="empty"><text>请先登录后查看你的题目</text></view>
+  <block wx:else>
+    <view class="tabs">
+      <view class="tab {{activeTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="switchTab">全部</view>
+      <view class="tab {{activeTab === 'pending' ? 'active' : ''}}" data-tab="pending" bindtap="switchTab">审核中</view>
+      <view class="tab {{activeTab === 'approved' ? 'active' : ''}}" data-tab="approved" bindtap="switchTab">已入库</view>
+      <view class="tab {{activeTab === 'rejected' ? 'active' : ''}}" data-tab="rejected" bindtap="switchTab">未通过</view>
+    </view>
+    <view wx:if="{{loading}}" class="loading">加载中...</view>
+    <block wx:elif="{{questions.length > 0}}">
+      <view class="q-card" wx:for="{{questions}}" wx:key="id">
+        <view class="q-status status-{{item.status}}">{{item.status === 'pending' ? '审核中' : item.status === 'approved' ? '已入库' : '未通过'}}</view>
+        <view class="q-content">{{item.content}}</view>
+        <view class="q-meta"><text>{{item.subject || '—'}}</text><text>·</text><text>{{item.created_at}}</text></view>
+      </view>
+    </block>
+    <view wx:else class="empty">
+      <text>还没有提交过题目</text>
+      <button class="submit-btn" bindtap="goSubmit">去提交</button>
+    </view>
+  </block>
+</view>

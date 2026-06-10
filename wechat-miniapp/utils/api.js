@@ -33,5 +33,6 @@ module.exports = {
   getWrongQuestions: (params) => request('/progress/wrong', 'GET', params),
   getStats: () => request('/progress/stats'),
   getProfile: () => request('/users/profile'),
-  updateProfile: (data) => request('/users/profile', 'PUT', data)
+  updateProfile: (data) => request('/users/profile', 'PUT', data),
+  getMyQuestions: (params) => request('/import/my-questions', 'GET', params)
 };

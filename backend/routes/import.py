@@ -1,6 +1,7 @@
 ﻿import os
 import json
 from flask import request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from models import db, ImportBatch, ParsedQuestion, Question
 from services.file_processor import FileProcessor
@@ -223,3 +224,21 @@ def reject_question(question_id):
     db.session.commit()
     
     return jsonify({'success': True})
+
+@import_bp.route('/my-questions', methods=['GET'])
+@jwt_required()
+def my_questions():
+    status = request.args.get('status', '')
+    query = ParsedQuestion.query
+    if status:
+        query = query.filter_by(status=status)
+    items = query.order_by(ParsedQuestion.created_at.desc()).limit(50).all()
+    return jsonify({
+        'questions': [{
+            'id': q.id,
+            'content': q.content or q.raw_content or '',
+            'subject': q.subject,
+            'status': q.status,
+            'created_at': q.created_at.strftime('%Y-%m-%d %H:%M')
+        } for q in items]
+    })
