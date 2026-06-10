@@ -1,0 +1,13 @@
+.container { background: #f5f5f5; min-height: 100vh; padding: 20rpx; }
+.feed { display: flex; flex-direction: column; gap: 16rpx; }
+.post { background: #fff; border-radius: 16rpx; padding: 24rpx; }
+.post-header { display: flex; align-items: center; gap: 16rpx; margin-bottom: 16rpx; }
+.post-avatar { width: 70rpx; height: 70rpx; border-radius: 50%; background: linear-gradient(135deg, #4A90D9, #6BA8E8); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28rpx; }
+.post-meta { flex: 1; display: flex; flex-direction: column; gap: 4rpx; }
+.post-name { font-size: 28rpx; color: #333; font-weight: bold; }
+.post-time { font-size: 22rpx; color: #999; }
+.post-content { font-size: 28rpx; color: #333; line-height: 1.6; margin-bottom: 16rpx; }
+.post-actions { display: flex; gap: 30rpx; font-size: 24rpx; color: #999; }
+.empty { text-align: center; padding: 200rpx 0; color: #999; display: flex; flex-direction: column; align-items: center; gap: 20rpx; }
+.empty-icon { font-size: 120rpx; }
+.loading { text-align: center; padding: 40rpx 0; color: #999; }

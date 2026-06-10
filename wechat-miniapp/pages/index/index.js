@@ -271,7 +271,7 @@ Page({
 
   // 底部导航栏按钮
   goSquare() {
-    wx.showToast({ title: '广场', icon: 'none' });
+    wx.navigateTo({ url: '/pages/square/square' });
   },
   
   goStudyRoom() {

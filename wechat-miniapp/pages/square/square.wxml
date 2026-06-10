@@ -1,0 +1,23 @@
+<view class="container">
+  <view wx:if="{{shares.length > 0}}" class="feed">
+    <view wx:for="{{shares}}" wx:key="id" class="post">
+      <view class="post-header">
+        <view class="post-avatar">{{item.user_nickname[0] || '👤'}}</view>
+        <view class="post-meta">
+          <text class="post-name">{{item.user_nickname || '匿名'}}</text>
+          <text class="post-time">{{item.created_at}}</text>
+        </view>
+      </view>
+      <view class="post-content">{{item.content}}</view>
+      <view class="post-actions">
+        <text>👍 {{item.like_count || 0}}</text>
+        <text>💬 {{item.comment_count || 0}}</text>
+      </view>
+    </view>
+  </view>
+  <view wx:elif="{{!loading}}" class="empty">
+    <view class="empty-icon">🏛️</view>
+    <text>广场还没有内容</text>
+  </view>
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+</view>
