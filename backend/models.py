@@ -1,5 +1,5 @@
 ﻿from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, date
 
 db = SQLAlchemy()
 
@@ -12,6 +12,9 @@ class User(db.Model):
     region = db.Column(db.String(20), default='mainland')
     member_type = db.Column(db.String(20), default='free')
     gold = db.Column(db.Integer, default=0)
+    points = db.Column(db.Integer, default=0)
+    exp = db.Column(db.Integer, default=0)
+    level = db.Column(db.Integer, default=1)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Question(db.Model):
@@ -107,3 +110,14 @@ class QuestionImage(db.Model):
     processed_url = db.Column(db.String(500))
     ocr_text = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class DailyCheckIn(db.Model):
+    __tablename__ = 'daily_checkins'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    check_date = db.Column(db.Date, nullable=False, default=date.today)
+    points_awarded = db.Column(db.Integer, default=10)
+    exp_awarded = db.Column(db.Integer, default=5)
+    streak = db.Column(db.Integer, default=1)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('user_id', 'check_date', name='uq_user_date'),)
