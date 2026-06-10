@@ -6,7 +6,22 @@
     "pages/share/share",
     "pages/profile/profile",
     "pages/sync/sync",
-    "pages/import/import"
+    "pages/import/import",
+    "pages/stats/stats",
+    "pages/myquestions/myquestions",
+    "pages/mybag/mybag",
+    "pages/classmates/classmates",
+    "pages/invite/invite",
+    "pages/membership/membership",
+    "pages/daily-challenge/daily-challenge",
+    "pages/leaderboard/leaderboard",
+    "pages/points-shop/points-shop",
+    "pages/licitong/licitong",
+    "pages/square/square",
+    "pages/studyroom/studyroom",
+    "pages/notifications/notifications",
+    "pages/difficulty/difficulty",
+    "pages/settings/settings"
   ],
   "window": {
     "backgroundTextStyle": "light",
