@@ -1,0 +1,21 @@
+<view class="container">
+  <view class="hero {{memberType}}">
+    <view class="hero-crown">{{memberType === 'premium' ? '👑' : '👤'}}</view>
+    <view class="hero-type">{{memberType === 'premium' ? 'Premium 会员' : '免费用户'}}</view>
+    <view wx:if="{{memberType === 'premium' && expireDate}}" class="hero-expire">到期时间：{{expireDate}}</view>
+  </view>
+  <view class="section-title">会员权益对比</view>
+  <view class="benefits-table">
+    <view class="bt-header">
+      <view class="bt-cell name">权益</view>
+      <view class="bt-cell">免费</view>
+      <view class="bt-cell highlight">Premium</view>
+    </view>
+    <view wx:for="{{benefits}}" wx:key="title" class="bt-row">
+      <view class="bt-cell name"><text class="b-icon">{{item.icon}}</text><text>{{item.title}}</text></view>
+      <view class="bt-cell">{{item.free ? '✓' : '—'}}</view>
+      <view class="bt-cell highlight">{{item.premium ? '✓' : '—'}}</view>
+    </view>
+  </view>
+  <button wx:if="{{memberType !== 'premium'}}" class="upgrade-btn" bindtap="upgrade">升级 Premium</button>
+</view>
