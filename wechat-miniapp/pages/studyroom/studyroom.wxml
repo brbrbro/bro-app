@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="hero">
+    <view class="hero-icon">📖</view>
+    <view class="hero-title">自习室</view>
+    <view class="hero-desc">专注学习，记录时长</view>
+  </view>
+  <view class="timer-card">
+    <view class="timer-label">本次专注</view>
+    <view class="timer-value">{{elapsedStr}}</view>
+    <button class="timer-btn {{running ? 'stop' : 'start'}}" bindtap="toggle">{{running ? '结束专注' : '开始专注'}}</button>
+  </view>
+  <view class="today-card">
+    <text class="today-label">今日累计</text>
+    <text class="today-value">{{todayMinutes}} 分钟</text>
+  </view>
+</view>

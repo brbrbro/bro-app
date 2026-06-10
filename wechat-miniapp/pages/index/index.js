@@ -275,7 +275,7 @@ Page({
   },
   
   goStudyRoom() {
-    wx.showToast({ title: '自习室', icon: 'none' });
+    wx.navigateTo({ url: '/pages/studyroom/studyroom' });
   },
   
   goPracticePage() {

@@ -1,0 +1,14 @@
+.container { background: #f5f5f5; min-height: 100vh; padding-bottom: 60rpx; }
+.hero { background: linear-gradient(135deg, #2ECC71, #58D68D); padding: 50rpx 30rpx; text-align: center; color: #fff; }
+.hero-icon { font-size: 100rpx; }
+.hero-title { font-size: 36rpx; font-weight: bold; margin-top: 16rpx; }
+.hero-desc { font-size: 26rpx; opacity: 0.9; margin-top: 10rpx; }
+.timer-card { margin: 30rpx; background: #fff; border-radius: 24rpx; padding: 60rpx 40rpx; text-align: center; }
+.timer-label { font-size: 26rpx; color: #999; margin-bottom: 20rpx; }
+.timer-value { font-size: 96rpx; font-weight: bold; color: #2ECC71; font-family: monospace; margin-bottom: 40rpx; }
+.timer-btn { color: #fff; border-radius: 50rpx; font-size: 30rpx; padding: 20rpx 0; }
+.timer-btn.start { background: #2ECC71; }
+.timer-btn.stop { background: #E74C3C; }
+.today-card { margin: 0 30rpx; background: #fff; border-radius: 16rpx; padding: 30rpx; display: flex; justify-content: space-between; align-items: center; }
+.today-label { font-size: 28rpx; color: #666; }
+.today-value { font-size: 32rpx; font-weight: bold; color: #2ECC71; }
