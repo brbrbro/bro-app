@@ -203,7 +203,7 @@ Page({
   },
 
   goDifficulty() {
-    wx.showToast({ title: '难度偏好', icon: 'none' });
+    wx.navigateTo({ url: '/pages/difficulty/difficulty' });
   },
 
   goScan() {

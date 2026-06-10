@@ -1,0 +1,15 @@
+<view class="container">
+  <view class="hint">选择你偏好的题目难度，将影响随机题、每日挑战等推送</view>
+  <view class="option-list">
+    <view wx:for="{{options}}" wx:key="value" class="option {{selected === item.value ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="select">
+      <view class="option-stars">
+        <text wx:for="{{[1,2,3,4,5]}}" wx:for-item="s" wx:key="*this" class="star {{s <= item.value ? 'fill' : ''}}">★</text>
+      </view>
+      <view class="option-meta">
+        <view class="option-label">{{item.label}}</view>
+        <view class="option-desc">{{item.desc}}</view>
+      </view>
+      <view wx:if="{{selected === item.value}}" class="check">✓</view>
+    </view>
+  </view>
+</view>
