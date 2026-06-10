@@ -199,7 +199,7 @@ Page({
 
   // 设置菜单功能
   goNotifications() {
-    wx.showToast({ title: '通知中心', icon: 'none' });
+    wx.navigateTo({ url: '/pages/notifications/notifications' });
   },
 
   goDifficulty() {

@@ -1,0 +1,18 @@
+<view class="container">
+  <view wx:if="{{notifications.length > 0}}">
+    <view class="actions-bar"><text class="clear-btn" bindtap="clearAll">清空</text></view>
+    <view wx:for="{{notifications}}" wx:key="id" class="notif-item {{item.read ? 'read' : ''}}" data-id="{{item.id}}" bindtap="markRead">
+      <view class="notif-icon">{{item.type === 'system' ? '🔔' : '💡'}}</view>
+      <view class="notif-body">
+        <view class="notif-title">{{item.title}}</view>
+        <view class="notif-content">{{item.content}}</view>
+        <view class="notif-time">{{item.time}}</view>
+      </view>
+      <view wx:if="{{!item.read}}" class="dot"></view>
+    </view>
+  </view>
+  <view wx:else class="empty">
+    <view class="empty-icon">🔕</view>
+    <text>暂无新通知</text>
+  </view>
+</view>
