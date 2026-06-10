@@ -1,0 +1,18 @@
+<view class="container">
+  <view wx:if="{{classmates.length > 0}}" class="cm-list">
+    <view wx:for="{{classmates}}" wx:key="id" class="cm-item">
+      <view class="cm-avatar">{{item.nickname[0] || '👤'}}</view>
+      <view class="cm-info">
+        <text class="cm-name">{{item.nickname}}</text>
+        <text class="cm-meta">{{item.subject || '未设置科目'}}</text>
+      </view>
+      <view class="cm-badge">Lv.{{item.level || 1}}</view>
+    </view>
+  </view>
+  <view wx:else class="empty">
+    <view class="empty-icon">👥</view>
+    <text class="empty-title">还没有同学</text>
+    <text class="empty-desc">邀请同学一起刷题，互相督促进步</text>
+    <button class="invite-btn" bindtap="goInvite">邀请同学</button>
+  </view>
+</view>
