@@ -1,0 +1,23 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+  <block wx:else>
+    <view class="hero-card">
+      <view class="hero-rate">{{correctRate}}<text class="hero-rate-unit">%</text></view>
+      <view class="hero-label">总正确率</view>
+    </view>
+    <view class="stat-row">
+      <view class="stat-cell"><text class="stat-num">{{totalAnswered}}</text><text class="stat-label">已答题</text></view>
+      <view class="stat-cell"><text class="stat-num green">{{correctCount}}</text><text class="stat-label">答对</text></view>
+      <view class="stat-cell"><text class="stat-num red">{{wrongCount}}</text><text class="stat-label">答错</text></view>
+    </view>
+    <view wx:if="{{bySubject.length > 0}}" class="section">
+      <view class="section-title">分科目正确率</view>
+      <view wx:for="{{bySubject}}" wx:key="subject" class="subject-row">
+        <text class="subject-name">{{item.subject}}</text>
+        <view class="subject-bar"><view class="subject-bar-fill" style="width: {{item.rate}}%"></view></view>
+        <text class="subject-rate">{{item.rate}}%</text>
+      </view>
+    </view>
+    <view wx:if="{{totalAnswered === 0}}" class="empty">还没有答题记录，去练习吧！</view>
+  </block>
+</view>
