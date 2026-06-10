@@ -1,0 +1,12 @@
+.container { background: #f5f5f5; min-height: 100vh; padding-bottom: 30rpx; }
+.header { display: flex; justify-content: space-between; align-items: center; padding: 30rpx; background: #fff; }
+.title { font-size: 34rpx; font-weight: bold; color: #333; }
+.count { font-size: 26rpx; color: #999; }
+.fav-list { padding: 20rpx; }
+.fav-item { display: flex; background: #fff; border-radius: 16rpx; margin-bottom: 20rpx; overflow: hidden; }
+.fav-main { flex: 1; padding: 24rpx; }
+.fav-content { font-size: 28rpx; color: #333; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12rpx; }
+.fav-meta { display: flex; gap: 12rpx; font-size: 22rpx; color: #999; }
+.fav-remove { width: 80rpx; display: flex; align-items: center; justify-content: center; font-size: 48rpx; color: #ccc; border-left: 2rpx solid #f5f5f5; }
+.empty { display: flex; flex-direction: column; align-items: center; padding: 200rpx 30rpx; color: #999; gap: 30rpx; }
+.empty-icon { font-size: 120rpx; }

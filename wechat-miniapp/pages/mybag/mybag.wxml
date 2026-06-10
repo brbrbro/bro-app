@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="header"><text class="title">我的书包</text><text class="count">共 {{favorites.length}} 题</text></view>
+  <view wx:if="{{favorites.length > 0}}" class="fav-list">
+    <view wx:for="{{favorites}}" wx:key="id" class="fav-item">
+      <view class="fav-main" data-id="{{item.id}}" bindtap="goPractice">
+        <view class="fav-content">{{item.content}}</view>
+        <view class="fav-meta"><text>{{item.subject || '—'}}</text><text wx:if="{{item.difficulty}}">·难度{{item.difficulty}}</text></view>
+      </view>
+      <view class="fav-remove" data-id="{{item.id}}" catchtap="removeFav">×</view>
+    </view>
+  </view>
+  <view wx:else class="empty"><view class="empty-icon">🎒</view><text>书包是空的，刷题时点击收藏可加入这里</text></view>
+</view>

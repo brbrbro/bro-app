@@ -1,4 +1,4 @@
-const STORAGE_KEYS = { PROGRESS: 'local_progress', NOTES: 'local_notes', USER: 'user_info', SYNC_TIME: 'last_sync_time' };
+const STORAGE_KEYS = { PROGRESS: 'local_progress', NOTES: 'local_notes', USER: 'user_info', SYNC_TIME: 'last_sync_time', FAVORITES: 'local_favorites' };
 
 function get(key) { return wx.getStorageSync(key); }
 function set(key, value) { wx.setStorageSync(key, value); }
@@ -10,10 +10,7 @@ function saveProgress(progress) {
 }
 
 function getProgress() { return get(STORAGE_KEYS.PROGRESS) || []; }
-
-function getWrongQuestions() {
-  return getProgress().filter(p => !p.is_correct);
-}
+function getWrongQuestions() { return getProgress().filter(p => !p.is_correct); }
 
 function saveNote(note) {
   const list = get(STORAGE_KEYS.NOTES) || [];
@@ -22,10 +19,27 @@ function saveNote(note) {
 }
 
 function getNotes() { return get(STORAGE_KEYS.NOTES) || []; }
+
+function addFavorite(question) {
+  const list = get(STORAGE_KEYS.FAVORITES) || [];
+  if (list.find(q => q.id === question.id)) return false;
+  list.unshift({ ...question, favorited_at: Date.now() });
+  set(STORAGE_KEYS.FAVORITES, list);
+  return true;
+}
+
+function removeFavorite(id) {
+  const list = (get(STORAGE_KEYS.FAVORITES) || []).filter(q => q.id !== id);
+  set(STORAGE_KEYS.FAVORITES, list);
+}
+
+function getFavorites() { return get(STORAGE_KEYS.FAVORITES) || []; }
+function isFavorited(id) { return !!(get(STORAGE_KEYS.FAVORITES) || []).find(q => q.id === id); }
+
 function setUserInfo(userInfo) { set(STORAGE_KEYS.USER, userInfo); }
 function getUserInfo() { return get(STORAGE_KEYS.USER); }
 function setSyncTime(time) { set(STORAGE_KEYS.SYNC_TIME, time); }
 function getSyncTime() { return get(STORAGE_KEYS.SYNC_TIME); }
 function clearAll() { Object.values(STORAGE_KEYS).forEach(key => { wx.removeStorageSync(key); }); }
 
-module.exports = { STORAGE_KEYS, saveProgress, getProgress, getWrongQuestions, saveNote, getNotes, setUserInfo, getUserInfo, setSyncTime, getSyncTime, clearAll };
+module.exports = { STORAGE_KEYS, saveProgress, getProgress, getWrongQuestions, saveNote, getNotes, setUserInfo, getUserInfo, setSyncTime, getSyncTime, clearAll, addFavorite, removeFavorite, getFavorites, isFavorited };
