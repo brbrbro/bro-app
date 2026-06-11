@@ -1,4 +1,9 @@
 <view class="container">
+  <view class="tabs period-tabs">
+    <view class="tab {{period === 'all' ? 'active' : ''}}" data-period="all" bindtap="switchPeriod">总榜</view>
+    <view class="tab {{period === 'week' ? 'active' : ''}}" data-period="week" bindtap="switchPeriod">周榜</view>
+    <view class="tab {{period === 'month' ? 'active' : ''}}" data-period="month" bindtap="switchPeriod">月榜</view>
+  </view>
   <view class="tabs">
     <view class="tab {{metric === 'correct' ? 'active' : ''}}" data-metric="correct" bindtap="switchMetric">答对排行</view>
     <view class="tab {{metric === 'total' ? 'active' : ''}}" data-metric="total" bindtap="switchMetric">答题排行</view>
