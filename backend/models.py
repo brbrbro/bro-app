@@ -145,3 +145,14 @@ class Invitation(db.Model):
     points_awarded = db.Column(db.Integer, default=50)
     created_at = db.Column(db.DateTime, default=_utc_now)
     __table_args__ = (db.UniqueConstraint('invitee_id', name='uq_invitee'),)
+
+
+class LexiconWord(db.Model):
+    __tablename__ = 'lexicon_words'
+    id = db.Column(db.Integer, primary_key=True)
+    word = db.Column(db.String(100), nullable=False)
+    definition = db.Column(db.Text, nullable=False)
+    example = db.Column(db.Text)
+    subject = db.Column(db.String(50), nullable=False, default='通用')
+    created_at = db.Column(db.DateTime, default=_utc_now)
+

@@ -43,5 +43,6 @@ module.exports = {
   redeem: (itemId) => request('/exchange', 'POST', { item_id: itemId }),
   getExchangeHistory: () => request('/exchange/history'),
   bindInvite: (code) => request('/invite/bind', 'POST', { invite_code: code }),
-  getInvitees: () => request('/invite/list')
+  getInvitees: () => request('/invite/list'),
+  getLexicon: (params) => request('/lexicon', 'GET', params)
 };

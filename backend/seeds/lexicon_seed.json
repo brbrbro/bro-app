@@ -1,0 +1,25 @@
+[
+  {"word":"函数","definition":"数学：自变量与因变量之间的对应关系","example":"y = 2x + 1 是一次函数","subject":"数学"},
+  {"word":"导数","definition":"函数在某点变化率的极限","example":"f(x)=x² 的导数是 2x","subject":"数学"},
+  {"word":"极限","definition":"函数值无限接近某常数的过程","example":"lim(x→0) sin(x)/x = 1","subject":"数学"},
+  {"word":"积分","definition":"与微分互为逆运算的求和过程","example":"∫x dx = ½x² + C","subject":"数学"},
+  {"word":"向量","definition":"既有大小又有方向的量","example":"(3,4) 表示长度 5 的向量","subject":"数学"},
+
+  {"word":"速度","definition":"位移对时间的变化率","example":"匀速直线运动 v=s/t","subject":"物理"},
+  {"word":"加速度","definition":"速度对时间的变化率","example":"自由落体 g≈9.8 m/s²","subject":"物理"},
+  {"word":"动能","definition":"物体由于运动而具有的能量","example":"Ek = ½mv²","subject":"物理"},
+  {"word":"功率","definition":"做功的快慢，单位时间内做的功","example":"P = W/t = Fv","subject":"物理"},
+  {"word":"欧姆定律","definition":"导体两端电压与电流成正比","example":"U = IR","subject":"物理"},
+
+  {"word":"摩尔","definition":"物质的量单位，1mol 含 6.02×10²³ 个粒子","example":"1mol H₂O 质量 18g","subject":"化学"},
+  {"word":"摩尔质量","definition":"1mol 物质的质量，单位 g/mol","example":"NaCl 的摩尔质量 58.5 g/mol","subject":"化学"},
+  {"word":"氧化","definition":"失去电子或与氧结合的反应","example":"铁生锈：4Fe + 3O₂ → 2Fe₂O₃","subject":"化学"},
+  {"word":"还原","definition":"得到电子的反应","example":"CuO + H₂ → Cu + H₂O","subject":"化学"},
+  {"word":"pH","definition":"溶液酸碱度量度，pH=-lg[H⁺]","example":"纯水 pH=7 为中性","subject":"化学"},
+
+  {"word":"细胞","definition":"生命的基本结构和功能单位","example":"红细胞、神经细胞、生殖细胞","subject":"生物"},
+  {"word":"DNA","definition":"脱氧核糖核酸，遗传信息载体","example":"双螺旋结构由沃森克里克提出","subject":"生物"},
+  {"word":"光合作用","definition":"叶绿体把 CO₂+H₂O 转化为有机物和 O₂","example":"6CO₂+6H₂O→C₆H₁₂O₆+6O₂","subject":"生物"},
+  {"word":"基因","definition":"控制生物性状的 DNA 片段","example":"血型由 ABO 基因决定","subject":"生物"},
+  {"word":"染色体","definition":"细胞核中由 DNA 和蛋白质组成的结构","example":"人类正常体细胞含 23 对染色体","subject":"生物"}
+]

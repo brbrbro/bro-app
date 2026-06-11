@@ -76,6 +76,19 @@ def main():
         ''')
         print("Created invitations")
 
+    if not table_exists(cur, 'lexicon_words'):
+        cur.execute('''
+            CREATE TABLE lexicon_words (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                word VARCHAR(100) NOT NULL,
+                definition TEXT NOT NULL,
+                example TEXT,
+                subject VARCHAR(50) DEFAULT '通用',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        print("Created lexicon_words")
+
     conn.commit()
     conn.close()
     print("Migration done.")
