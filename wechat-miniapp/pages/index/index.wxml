@@ -86,11 +86,14 @@
       >
         🛒
       </view>
-      <view 
-        class="sign-in-btn {{hasSignedIn ? 'signed' : ''}}" 
-        bindtap="signIn"
-      >
-        {{hasSignedIn ? t.signedIn : t.signIn}}
+      <view class="signin-wrap">
+        <view 
+          class="sign-in-btn {{hasSignedIn ? 'signed' : ''}}" 
+          bindtap="signIn"
+        >
+          {{hasSignedIn ? t.signedIn : t.signIn}}
+        </view>
+        <text wx:if="{{streak > 0}}" class="streak-badge">🔥连{{streak}}天</text>
       </view>
     </view>
 

@@ -20,6 +20,7 @@ Page({
     userPoints: 0,
     isMember: false,
     hasSignedIn: false,
+    streak: 0,
     
     // 菜单面板展开状态
     menuOpen: false,
@@ -107,10 +108,11 @@ Page({
     this.setData({
       userInfo,
       isLoggedIn,
-      userLevel: isLoggedIn ? 1 : 1,
+      userLevel: 1,
       userExp: 0,
       maxExp: 100,
       userPoints: 0,
+      streak: 0,
       isMember: isLoggedIn && userInfo && userInfo.member_type === 'premium'
     });
 
@@ -129,7 +131,7 @@ Page({
       .catch(() => {});
 
     api.getCheckinStatus()
-      .then(s => this.setData({ hasSignedIn: s.already_checked }))
+      .then(s => this.setData({ hasSignedIn: s.already_checked, streak: s.streak || 0 }))
       .catch(() => {});
   },
 
@@ -185,7 +187,8 @@ Page({
           userPoints: res.total_points,
           userExp: res.exp,
           userLevel: res.level,
-          hasSignedIn: true
+          hasSignedIn: true,
+          streak: res.streak
         });
         wx.showToast({ title: `签到+${res.points_awarded}积分`, icon: 'success' });
       })
