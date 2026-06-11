@@ -16,3 +16,6 @@
 .action-buttons { display: flex; gap: 20rpx; margin-top: 30rpx; }
 .action-buttons button { flex: 1; }
 .action-buttons button.primary { background: #4A90D9; color: #fff; }
+.qheader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20rpx; }
+.fav-btn { font-size: 48rpx; color: #ccc; padding: 8rpx 16rpx; }
+.fav-btn.active { color: #FFD700; }

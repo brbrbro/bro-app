@@ -1,11 +1,14 @@
 <view class="container">
   <view wx:if="{{loading}}" class="loading">加载中...</view>
   <view wx:elif="{{question}}" class="question-section">
-    <view class="question-type">{{question.type === 'choice' ? '选择题' : question.type === 'blank' ? '填空题' : '解答题'}}</view>
+    <view class="qheader">
+      <view class="question-type">{{question.type === 'choice' ? '选择题' : question.type === 'blank' ? '填空题' : '解答题'}}</view>
+      <view class="fav-btn {{isFav ? 'active' : ''}}" bindtap="toggleFav">{{isFav ? '⭐' : '☆'}}</view>
+    </view>
     <view class="question-content">{{question.content}}</view>
 
     <view wx:if="{{question.type === 'choice' && question.options}}" class="options">
-      <block wx:for="{{question.options}}" wx:key="index">
+      <block wx:for="{{question.options}}" wx:key="key">
         <view class="option-item {{userAnswer === item.key ? 'selected' : ''}}" data-option="{{item.key}}" bindtap="selectOption">
           <text class="option-key">{{item.key}}</text>
           <text class="option-text">{{item.text}}</text>
@@ -20,9 +23,8 @@
     <view wx:if="{{submitted}}" class="result-area">
       <view class="result-badge {{isCorrect ? 'correct' : 'wrong'}}">{{isCorrect ? '回答正确' : '回答错误'}}</view>
       <view class="answer-section"><text class="label">正确答案：</text><text class="answer">{{question.answer}}</text></view>
-      <view class="explanation-section"><text class="label">解析：</text><text class="explanation">{{question.explanation}}</text></view>
+      <view wx:if="{{question.explanation}}" class="explanation-section"><text class="label">解析：</text><text class="explanation">{{question.explanation}}</text></view>
       <view class="action-buttons">
-        <button bindtap="addToNotes">添加笔记</button>
         <button class="primary" bindtap="nextQuestion">下一题</button>
       </view>
     </view>
