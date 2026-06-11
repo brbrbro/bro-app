@@ -1,7 +1,7 @@
 const auth = require('../../utils/auth.js');
 
 Page({
-  data: { inviteCode: '', inviteText: '' },
+  data: { inviteCode: '', inviteText: '', invitees: [], totalInvited: 0 },
 
   onLoad() {
     const user = auth.getUserInfo();
@@ -22,6 +22,16 @@ Page({
       data: this.data.inviteText,
       success: () => wx.showToast({ title: '邀请文案已复制', icon: 'success' })
     });
+  },
+
+  onShow() {
+    const api = require('../../utils/api.js');
+    const auth = require('../../utils/auth.js');
+    if (auth.isLoggedIn()) {
+      api.getInvitees()
+        .then(r => this.setData({ invitees: r.invitees, totalInvited: r.total }))
+        .catch(() => {});
+    }
   },
 
   onShareAppMessage() {

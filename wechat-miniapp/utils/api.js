@@ -38,5 +38,10 @@ module.exports = {
   getLeaderboard: (params) => request('/leaderboard', 'GET', params),
   getCheckinStatus: () => request('/checkin/today'),
   doCheckin: () => request('/checkin', 'POST'),
-  getCheckinHistory: () => request('/checkin/history')
+  getCheckinHistory: () => request('/checkin/history'),
+  getShopItems: () => request('/exchange/items'),
+  redeem: (itemId) => request('/exchange', 'POST', { item_id: itemId }),
+  getExchangeHistory: () => request('/exchange/history'),
+  bindInvite: (code) => request('/invite/bind', 'POST', { invite_code: code }),
+  getInvitees: () => request('/invite/list')
 };

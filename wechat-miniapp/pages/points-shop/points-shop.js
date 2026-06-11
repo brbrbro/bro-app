@@ -32,7 +32,16 @@ Page({
     wx.showModal({
       title: '确认兑换', content: `用 ${item.cost} 积分兑换「${item.name}」？`,
       success: (res) => {
-        if (res.confirm) wx.showToast({ title: '功能即将上线', icon: 'none' });
+        if (!res.confirm) return;
+        api.redeem(item.id)
+          .then(r => {
+            this.setData({ userPoints: r.remaining_points });
+            wx.showToast({ title: '兑换成功', icon: 'success' });
+          })
+          .catch(err => {
+            const msg = err && err.error === 'insufficient_points' ? '积分不足' : '兑换失败';
+            wx.showToast({ title: msg, icon: 'none' });
+          });
       }
     });
   }

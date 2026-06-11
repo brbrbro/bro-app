@@ -15,4 +15,11 @@
     <button class="copy-btn" bindtap="copyText">复制文案</button>
   </view>
   <button class="share-btn" open-type="share">分享给微信好友</button>
+  <view wx:if="{{totalInvited > 0}}" class="invited-card">
+    <view class="invited-title">已邀请 {{totalInvited}} 位同学</view>
+    <view wx:for="{{invitees}}" wx:key="user_id" class="invited-item">
+      <view class="invited-avatar">{{item.nickname[0] || '👤'}}</view>
+      <text class="invited-name">{{item.nickname}}</text>
+    </view>
+  </view>
 </view>
