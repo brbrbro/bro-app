@@ -48,4 +48,6 @@ module.exports = {
   getNotifications: () => request('/notifications', 'GET'),
   markNotifRead: (id) => request(`/notifications/${id}/read`, 'POST'),
   markAllNotifRead: () => request('/notifications/read-all', 'POST')
+  ,submitStudySession: (seconds) => request('/study/session', 'POST', { seconds }),
+  getStudyToday: () => request('/study/today')
 };

@@ -1,3 +1,6 @@
+const api = require('../../utils/api.js');
+const auth = require('../../utils/auth.js');
+
 const STORAGE_KEY_DAY = 'studyroom_day';
 const STORAGE_KEY_SEC = 'studyroom_seconds';
 
@@ -15,6 +18,13 @@ Page({
       wx.setStorageSync(STORAGE_KEY_SEC, 0);
     }
     this.setData({ todayMinutes: Math.floor(seconds / 60) });
+
+    // Override with cloud total if logged in
+    if (auth.isLoggedIn()) {
+      api.getStudyToday()
+        .then(r => this.setData({ todayMinutes: r.today_minutes }))
+        .catch(() => {});
+    }
   },
 
   onUnload() {
@@ -43,6 +53,13 @@ Page({
     wx.setStorageSync(STORAGE_KEY_SEC, total);
     this.setData({ running: false, elapsedStr: '00:00:00', todayMinutes: Math.floor(total / 60) });
     wx.showToast({ title: `本次专注 ${Math.floor(seconds / 60)} 分钟`, icon: 'success' });
+
+    if (auth.isLoggedIn() && seconds > 0) {
+      api.submitStudySession(seconds)
+        .then(() => api.getStudyToday())
+        .then(r => this.setData({ todayMinutes: r.today_minutes }))
+        .catch(() => {});
+    }
   },
 
   format(sec) {

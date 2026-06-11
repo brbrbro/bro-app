@@ -167,3 +167,11 @@ class Notification(db.Model):
     read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=_utc_now)
 
+
+class StudySession(db.Model):
+    __tablename__ = 'study_sessions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    seconds = db.Column(db.Integer, nullable=False)
+    started_at = db.Column(db.DateTime, default=_utc_now)
+

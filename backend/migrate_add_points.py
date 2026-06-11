@@ -108,6 +108,18 @@ def main():
                     ('小贴士', '每日签到可领取积分，连续签到奖励更多'))
         print("Created notifications + seeded 2 system messages")
 
+    if not table_exists(cur, 'study_sessions'):
+        cur.execute('''
+            CREATE TABLE study_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                seconds INTEGER NOT NULL,
+                started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        ''')
+        print("Created study_sessions")
+
     conn.commit()
     conn.close()
     print("Migration done.")
