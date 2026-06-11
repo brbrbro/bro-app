@@ -21,7 +21,9 @@ Page({
   },
 
   loadChallenge() {
-    api.getRandomQuestion({})
+    const diff = wx.getStorageSync('difficulty_pref') || null;
+    const params = diff ? { difficulty: diff } : {};
+    api.getRandomQuestion(params)
       .then(q => this.setData({ question: q, loading: false }))
       .catch(() => {
         this.setData({ loading: false });
