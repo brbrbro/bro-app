@@ -124,3 +124,24 @@ class DailyCheckIn(db.Model):
     streak = db.Column(db.Integer, default=1)
     created_at = db.Column(db.DateTime, default=_utc_now)
     __table_args__ = (db.UniqueConstraint('user_id', 'check_date', name='uq_user_date'),)
+
+
+class ExchangeRecord(db.Model):
+    __tablename__ = 'exchange_records'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    item_id = db.Column(db.Integer, nullable=False)
+    item_name = db.Column(db.String(100), nullable=False)
+    cost = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=_utc_now)
+
+
+class Invitation(db.Model):
+    __tablename__ = 'invitations'
+    id = db.Column(db.Integer, primary_key=True)
+    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    invitee_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    invite_code = db.Column(db.String(50), nullable=False)
+    points_awarded = db.Column(db.Integer, default=50)
+    created_at = db.Column(db.DateTime, default=_utc_now)
+    __table_args__ = (db.UniqueConstraint('invitee_id', name='uq_invitee'),)

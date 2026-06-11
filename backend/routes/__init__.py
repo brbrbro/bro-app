@@ -9,9 +9,11 @@ sync_bp = Blueprint('sync', __name__)
 import_bp = Blueprint('import', __name__)
 leaderboard_bp = Blueprint('leaderboard', __name__)
 checkin_bp = Blueprint('checkin', __name__)
+exchange_bp = Blueprint('exchange', __name__)
+invite_bp = Blueprint('invite', __name__)
 
 def register_blueprints(app):
-    from . import questions, shares, sync, users, progress, leaderboard, checkin
+    from . import questions, shares, sync, users, progress, leaderboard, checkin, exchange, invite
     importlib.import_module('.import', 'routes')
     app.register_blueprint(questions_bp, url_prefix='/api/questions')
     app.register_blueprint(users_bp, url_prefix='/api/users')
@@ -21,3 +23,5 @@ def register_blueprints(app):
     app.register_blueprint(import_bp, url_prefix='/api/import')
     app.register_blueprint(leaderboard_bp, url_prefix='/api/leaderboard')
     app.register_blueprint(checkin_bp, url_prefix='/api/checkin')
+    app.register_blueprint(exchange_bp, url_prefix='/api/exchange')
+    app.register_blueprint(invite_bp, url_prefix='/api/invite')

@@ -47,6 +47,35 @@ def main():
         ''')
         print("Created daily_checkins")
 
+    if not table_exists(cur, 'exchange_records'):
+        cur.execute('''
+            CREATE TABLE exchange_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                item_id INTEGER NOT NULL,
+                item_name VARCHAR(100) NOT NULL,
+                cost INTEGER NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        ''')
+        print("Created exchange_records")
+
+    if not table_exists(cur, 'invitations'):
+        cur.execute('''
+            CREATE TABLE invitations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                inviter_id INTEGER NOT NULL,
+                invitee_id INTEGER NOT NULL UNIQUE,
+                invite_code VARCHAR(50) NOT NULL,
+                points_awarded INTEGER DEFAULT 50,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (inviter_id) REFERENCES users(id),
+                FOREIGN KEY (invitee_id) REFERENCES users(id)
+            )
+        ''')
+        print("Created invitations")
+
     conn.commit()
     conn.close()
     print("Migration done.")
