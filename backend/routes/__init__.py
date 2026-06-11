@@ -12,9 +12,10 @@ checkin_bp = Blueprint('checkin', __name__)
 exchange_bp = Blueprint('exchange', __name__)
 invite_bp = Blueprint('invite', __name__)
 lexicon_bp = Blueprint('lexicon', __name__)
+notification_bp = Blueprint('notification', __name__)
 
 def register_blueprints(app):
-    from . import questions, shares, sync, users, progress, leaderboard, checkin, exchange, invite, lexicon
+    from . import questions, shares, sync, users, progress, leaderboard, checkin, exchange, invite, lexicon, notification
     importlib.import_module('.import', 'routes')
     app.register_blueprint(questions_bp, url_prefix='/api/questions')
     app.register_blueprint(users_bp, url_prefix='/api/users')
@@ -27,3 +28,4 @@ def register_blueprints(app):
     app.register_blueprint(exchange_bp, url_prefix='/api/exchange')
     app.register_blueprint(invite_bp, url_prefix='/api/invite')
     app.register_blueprint(lexicon_bp, url_prefix='/api/lexicon')
+    app.register_blueprint(notification_bp, url_prefix='/api/notifications')

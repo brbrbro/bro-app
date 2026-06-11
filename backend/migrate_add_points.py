@@ -89,6 +89,25 @@ def main():
         ''')
         print("Created lexicon_words")
 
+    if not table_exists(cur, 'notifications'):
+        cur.execute('''
+            CREATE TABLE notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                type VARCHAR(20) DEFAULT 'system',
+                title VARCHAR(200) NOT NULL,
+                content TEXT NOT NULL,
+                read BOOLEAN DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        ''')
+        cur.execute("INSERT INTO notifications (user_id, type, title, content) VALUES (NULL, 'system', ?, ?)",
+                    ('欢迎使用 BRO', '一起开启刷题之旅吧！'))
+        cur.execute("INSERT INTO notifications (user_id, type, title, content) VALUES (NULL, 'tip', ?, ?)",
+                    ('小贴士', '每日签到可领取积分，连续签到奖励更多'))
+        print("Created notifications + seeded 2 system messages")
+
     conn.commit()
     conn.close()
     print("Migration done.")

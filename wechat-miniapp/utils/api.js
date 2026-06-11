@@ -44,5 +44,8 @@ module.exports = {
   getExchangeHistory: () => request('/exchange/history'),
   bindInvite: (code) => request('/invite/bind', 'POST', { invite_code: code }),
   getInvitees: () => request('/invite/list'),
-  getLexicon: (params) => request('/lexicon', 'GET', params)
+  getLexicon: (params) => request('/lexicon', 'GET', params),
+  getNotifications: () => request('/notifications', 'GET'),
+  markNotifRead: (id) => request(`/notifications/${id}/read`, 'POST'),
+  markAllNotifRead: () => request('/notifications/read-all', 'POST')
 };
