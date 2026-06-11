@@ -61,10 +61,13 @@ def get_question(question_id):
 def get_random_question():
     region = request.args.get('region', 'mainland')
     subject = request.args.get('subject')
+    difficulty = request.args.get('difficulty', type=int)
     
     query = Question.query.filter_by(status='approved', region=region)
     if subject:
         query = query.filter_by(subject=subject)
+    if difficulty:
+        query = query.filter_by(difficulty=difficulty)
     
     question = query.order_by(db.func.random()).first()
     if not question:
@@ -74,5 +77,9 @@ def get_random_question():
         'id': question.id,
         'content': question.content,
         'type': question.type,
-        'options': question.options
+        'difficulty': question.difficulty,
+        'subject': question.subject,
+        'options': question.options,
+        'answer': question.answer,
+        'explanation': question.explanation
     })

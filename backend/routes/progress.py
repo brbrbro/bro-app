@@ -6,8 +6,7 @@ from . import progress_bp
 @progress_bp.route('', methods=['POST'])
 @jwt_required()
 def submit_progress():
-    """提交答题记录"""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     data = request.get_json()
     
     if not data or not data.get('question_id'):
@@ -17,19 +16,36 @@ def submit_progress():
     if not question:
         return jsonify({'error': '题目不存在'}), 404
     
+    is_correct = bool(data.get('is_correct', False))
+    is_challenge = bool(data.get('is_challenge', False))
+    
     progress = UserProgress(
         user_id=user_id,
         question_id=data['question_id'],
         user_answer=data.get('user_answer', ''),
-        is_correct=data.get('is_correct', False),
+        is_correct=is_correct,
         time_spent=data.get('time_spent', 0)
     )
     db.session.add(progress)
     
-    question.solved_count += 1
+    question.solved_count = (question.solved_count or 0) + 1
+    
+    points_awarded = 0
+    if is_correct:
+        from models import User
+        user = db.session.get(User, user_id)
+        if user:
+            base_pts = max(1, question.difficulty or 1)
+            points_awarded = base_pts * 2 if is_challenge else base_pts
+            user.points = (user.points or 0) + points_awarded
+    
     db.session.commit()
     
-    return jsonify({'success': True, 'progress_id': progress.id})
+    return jsonify({
+        'success': True,
+        'progress_id': progress.id,
+        'points_awarded': points_awarded
+    })
 
 @progress_bp.route('', methods=['GET'])
 @jwt_required()
