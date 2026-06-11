@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, abort
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from models import db, User
 from . import users_bp
@@ -77,7 +77,9 @@ def wx_login():
 def get_profile():
     """获取当前用户信息"""
     user_id = get_jwt_identity()
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id)
+    if not user:
+        abort(404)
     
     return jsonify({
         'id': user.id,
@@ -97,7 +99,9 @@ def get_profile():
 def update_profile():
     """更新用户信息"""
     user_id = get_jwt_identity()
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id)
+    if not user:
+        abort(404)
     
     data = request.get_json()
     if 'nickname' in data:

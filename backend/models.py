@@ -1,7 +1,10 @@
 ﻿from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 db = SQLAlchemy()
+
+def _utc_now():
+    return datetime.now(timezone.utc)
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -15,7 +18,7 @@ class User(db.Model):
     points = db.Column(db.Integer, default=0)
     exp = db.Column(db.Integer, default=0)
     level = db.Column(db.Integer, default=1)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=_utc_now)
 
 class Question(db.Model):
     __tablename__ = 'questions'
@@ -35,7 +38,7 @@ class Question(db.Model):
     correct_rate = db.Column(db.Float, default=0)
     source = db.Column(db.String(20), default='seed')
     status = db.Column(db.String(20), default='approved')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=_utc_now)
 
 class UserProgress(db.Model):
     __tablename__ = 'user_progress'
@@ -46,7 +49,7 @@ class UserProgress(db.Model):
     user_answer = db.Column(db.Text)
     is_correct = db.Column(db.Boolean)
     time_spent = db.Column(db.Integer, default=0)
-    answered_at = db.Column(db.DateTime, default=datetime.utcnow)
+    answered_at = db.Column(db.DateTime, default=_utc_now)
 
 class Share(db.Model):
     __tablename__ = 'shares'
@@ -59,7 +62,7 @@ class Share(db.Model):
     like_count = db.Column(db.Integer, default=0)
     comment_count = db.Column(db.Integer, default=0)
     status = db.Column(db.String(20), default='approved')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=_utc_now)
 
 class ImportBatch(db.Model):
     __tablename__ = 'import_batches'
@@ -76,8 +79,8 @@ class ImportBatch(db.Model):
     grade = db.Column(db.String(20))
     knowledge_point = db.Column(db.String(200))
     created_by = db.Column(db.String(100))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=_utc_now)
+    updated_at = db.Column(db.DateTime, default=_utc_now)
 
 class ParsedQuestion(db.Model):
     __tablename__ = 'parsed_questions'
@@ -99,7 +102,7 @@ class ParsedQuestion(db.Model):
     status = db.Column(db.String(20), default='pending')
     confidence = db.Column(db.Float)
     review_notes = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=_utc_now)
 
 class QuestionImage(db.Model):
     __tablename__ = 'question_images'
@@ -109,7 +112,7 @@ class QuestionImage(db.Model):
     original_url = db.Column(db.String(500))
     processed_url = db.Column(db.String(500))
     ocr_text = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=_utc_now)
 
 class DailyCheckIn(db.Model):
     __tablename__ = 'daily_checkins'
@@ -119,5 +122,5 @@ class DailyCheckIn(db.Model):
     points_awarded = db.Column(db.Integer, default=10)
     exp_awarded = db.Column(db.Integer, default=5)
     streak = db.Column(db.Integer, default=1)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=_utc_now)
     __table_args__ = (db.UniqueConstraint('user_id', 'check_date', name='uq_user_date'),)

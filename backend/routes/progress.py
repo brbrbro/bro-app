@@ -13,7 +13,7 @@ def submit_progress():
     if not data or not data.get('question_id'):
         return jsonify({'error': '缺少 question_id'}), 400
     
-    question = Question.query.get(data['question_id'])
+    question = db.session.get(Question, data['question_id'])
     if not question:
         return jsonify({'error': '题目不存在'}), 404
     

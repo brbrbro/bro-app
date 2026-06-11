@@ -11,7 +11,7 @@ def today_status():
     user_id = int(get_jwt_identity())
     today = date.today()
     record = DailyCheckIn.query.filter_by(user_id=user_id, check_date=today).first()
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     return jsonify({
         'already_checked': record is not None,
         'today': today.isoformat(),
@@ -28,7 +28,7 @@ def do_checkin():
 
     existing = DailyCheckIn.query.filter_by(user_id=user_id, check_date=today).first()
     if existing:
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         return jsonify({
             'success': False,
             'error': 'already_checked',
@@ -49,7 +49,7 @@ def do_checkin():
     )
     db.session.add(record)
 
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     user.points = (user.points or 0) + points_award
     user.exp = (user.exp or 0) + exp_award
     while user.exp >= 100:
