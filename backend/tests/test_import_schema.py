@@ -58,3 +58,30 @@ def test_import_recognition_migration_adds_missing_columns(tmp_path, monkeypatch
 
     for name, _ in mig.COLUMNS:
         assert name in cols
+
+
+def test_question_candidate_to_dict_is_stable():
+    from services.import_schema import QuestionCandidate, ImageAsset, FormulaAsset
+
+    candidate = QuestionCandidate(
+        index=1,
+        content='求 x^2=4 的解。',
+        options=[],
+        answer='±2',
+        explanation='平方根定义',
+        question_type='blank',
+        difficulty=2,
+        source_page=1,
+        bbox={'x': 0, 'y': 0, 'w': 100, 'h': 80},
+        raw_ocr_text='1. 求 x^2=4 的解。',
+        images=[ImageAsset(path='/tmp/q1.png', url='/static/images/q1.png', image_type='diagram')],
+        formulas=[FormulaAsset(latex='x^2=4', image_url='/static/images/f1.png')],
+        confidence_detail={'text': 0.9, 'layout': 0.8, 'formula': 0.7}
+    )
+
+    data = candidate.to_dict()
+    assert data['content'] == '求 x^2=4 的解。'
+    assert data['formula_latex'] == ['x^2=4']
+    assert data['formula_images'] == ['/static/images/f1.png']
+    assert data['images'][0]['type'] == 'diagram'
+    assert data['confidence'] == 0.8
