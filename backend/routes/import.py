@@ -6,12 +6,67 @@ from werkzeug.utils import secure_filename
 from models import db, ImportBatch, ParsedQuestion, Question
 from services.file_processor import FileProcessor
 from services.ai_parser import AIParser
+from services.document_ingestor import DocumentIngestor
+from services.recognition_pipeline import RecognitionPipeline
+from services.question_normalizer import QuestionNormalizer
 from . import import_bp
 
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'txt'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def _parsed_from_payload(batch_id, payload):
+    return ParsedQuestion(
+        batch_id=batch_id,
+        raw_content=json.dumps(payload, ensure_ascii=False),
+        content=payload.get('content', ''),
+        options=json.dumps(payload.get('options', []), ensure_ascii=False),
+        answer=payload.get('answer', ''),
+        explanation=payload.get('explanation', ''),
+        exam_type=payload.get('exam_type', ''),
+        subject=payload.get('subject', ''),
+        grade=payload.get('grade', ''),
+        knowledge_point=payload.get('knowledge_point', '不详'),
+        type=payload.get('type', 'unknown'),
+        difficulty=payload.get('difficulty', 3),
+        confidence=payload.get('confidence', 0),
+        status='pending',
+        source_page=payload.get('source_page'),
+        bbox=json.dumps(payload.get('bbox'), ensure_ascii=False),
+        images=json.dumps(payload.get('images', []), ensure_ascii=False),
+        formula_latex=json.dumps(payload.get('formula_latex', []), ensure_ascii=False),
+        formula_images=json.dumps(payload.get('formula_images', []), ensure_ascii=False),
+        raw_ocr_text=payload.get('raw_ocr_text', ''),
+        confidence_detail=json.dumps(payload.get('confidence_detail', {}), ensure_ascii=False)
+    )
+
+
+def _serialize_parsed_question(q):
+    return {
+        'id': q.id,
+        'content': q.content,
+        'options': json.loads(q.options) if q.options else [],
+        'answer': q.answer,
+        'explanation': q.explanation,
+        'exam_type': q.exam_type,
+        'subject': q.subject,
+        'grade': q.grade,
+        'knowledge_point': q.knowledge_point,
+        'type': q.type,
+        'difficulty': q.difficulty,
+        'confidence': q.confidence,
+        'status': q.status,
+        'source_page': q.source_page,
+        'bbox': json.loads(q.bbox) if q.bbox else None,
+        'images': json.loads(q.images) if q.images else [],
+        'formula_latex': json.loads(q.formula_latex) if q.formula_latex else [],
+        'formula_images': json.loads(q.formula_images) if q.formula_images else [],
+        'raw_ocr_text': q.raw_ocr_text,
+        'confidence_detail': json.loads(q.confidence_detail) if q.confidence_detail else {}
+    }
+
 
 @import_bp.route('/upload', methods=['POST'])
 def upload_file():
@@ -224,6 +279,126 @@ def reject_question(question_id):
     db.session.commit()
     
     return jsonify({'success': True})
+
+@import_bp.route('/single', methods=['POST'])
+def import_single():
+    data = request.get_json() or {}
+    text = data.get('text', '')
+    exam_type = data.get('exam_type', '')
+    subject = data.get('subject', '')
+    grade = data.get('grade', '')
+    knowledge_point = data.get('knowledge_point', '不详')
+
+    if not exam_type:
+        return jsonify({'error': '请选择考试体系'}), 400
+    if not subject:
+        return jsonify({'error': '请选择科目'}), 400
+    if not text.strip():
+        return jsonify({'error': '请输入题目内容'}), 400
+
+    from services.import_schema import DocumentPage
+    pages = [DocumentPage(page=1, text=text)]
+    candidates = RecognitionPipeline().recognize(pages, subject=subject)
+    normalizer = QuestionNormalizer()
+
+    batch = ImportBatch(
+        source_type='single',
+        source_file='single-input',
+        source_url='',
+        status='reviewing',
+        exam_type=exam_type,
+        subject=subject,
+        grade=grade,
+        knowledge_point=knowledge_point,
+        created_by=data.get('created_by', 'admin'),
+        parsed_questions=len(candidates)
+    )
+    db.session.add(batch)
+    db.session.commit()
+
+    parsed_items = []
+    defaults = {'exam_type': exam_type, 'subject': subject, 'grade': grade, 'knowledge_point': knowledge_point}
+    for candidate in candidates:
+        payload = normalizer.to_parsed_payload(candidate, defaults)
+        parsed = _parsed_from_payload(batch.id, payload)
+        db.session.add(parsed)
+        parsed_items.append(parsed)
+
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'batch_id': batch.id,
+        'total_questions': len(parsed_items),
+        'questions': [_serialize_parsed_question(q) for q in parsed_items]
+    })
+
+
+@import_bp.route('/batch', methods=['POST'])
+def import_batch():
+    if 'file' not in request.files:
+        return jsonify({'error': '没有文件'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': '文件名为空'}), 400
+    if not allowed_file(file.filename):
+        return jsonify({'error': '不支持的文件类型'}), 400
+
+    exam_type = request.form.get('exam_type', '')
+    subject = request.form.get('subject', '')
+    grade = request.form.get('grade', '')
+    knowledge_point = request.form.get('knowledge_point', '不详')
+    if not exam_type:
+        return jsonify({'error': '请选择考试体系'}), 400
+    if not subject:
+        return jsonify({'error': '请选择科目'}), 400
+
+    processor = FileProcessor()
+    filename = secure_filename(file.filename)
+    file_path = processor.save_upload(file, filename)
+    file_type = filename.rsplit('.', 1)[1].lower()
+
+    batch = ImportBatch(
+        source_type=file_type,
+        source_file=filename,
+        source_url=file_path,
+        status='processing',
+        exam_type=exam_type,
+        subject=subject,
+        grade=grade,
+        knowledge_point=knowledge_point,
+        created_by=request.form.get('created_by', 'admin')
+    )
+    db.session.add(batch)
+    db.session.commit()
+
+    try:
+        pages = DocumentIngestor().ingest(file_path, file_type)
+        candidates = RecognitionPipeline().recognize(pages, subject=subject)
+        normalizer = QuestionNormalizer()
+        defaults = {'exam_type': exam_type, 'subject': subject, 'grade': grade, 'knowledge_point': knowledge_point}
+        parsed_items = []
+        for candidate in candidates:
+            payload = normalizer.to_parsed_payload(candidate, defaults)
+            parsed = _parsed_from_payload(batch.id, payload)
+            db.session.add(parsed)
+            parsed_items.append(parsed)
+
+        batch.status = 'reviewing'
+        batch.parsed_questions = len(parsed_items)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'batch_id': batch.id,
+            'status': batch.status,
+            'total_questions': len(parsed_items)
+        })
+    except Exception as exc:
+        batch.status = 'failed'
+        db.session.commit()
+        return jsonify({'error': str(exc), 'batch_id': batch.id}), 500
+
 
 @import_bp.route('/my-questions', methods=['GET'])
 @jwt_required()
