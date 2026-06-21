@@ -15,6 +15,12 @@ def test_single_text_import_creates_one_parsed_question(client):
     assert data['total_questions'] == 1
     assert data['questions'][0]['answer'] == '2'
 
+    status_resp = client.get(f"/api/import/status/{data['batch_id']}")
+    assert status_resp.status_code == 200
+    status = status_resp.get_json()
+    assert status['total_questions'] == 1
+    assert status['parsed_questions'] == 1
+
 
 def test_single_import_requires_subject(client):
     resp = client.post('/api/import/single', json={'text': '1. hi'})
@@ -36,3 +42,9 @@ def test_batch_txt_import_creates_batch_and_questions(client):
     assert body['success'] is True
     assert body['total_questions'] == 2
     assert body['batch_id']
+
+    status_resp = client.get(f"/api/import/status/{body['batch_id']}")
+    assert status_resp.status_code == 200
+    status = status_resp.get_json()
+    assert status['total_questions'] == 2
+    assert status['parsed_questions'] == 2

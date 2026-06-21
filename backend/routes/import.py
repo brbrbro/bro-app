@@ -156,6 +156,7 @@ def upload_file():
 @import_bp.route('/status/<int:batch_id>', methods=['GET'])
 def get_batch_status(batch_id):
     batch = ImportBatch.query.get_or_404(batch_id)
+    completed_at = getattr(batch, 'completed_at', None)
     
     return jsonify({
         'id': batch.id,
@@ -170,7 +171,7 @@ def get_batch_status(batch_id):
         'parsed_questions': batch.parsed_questions,
         'approved_questions': batch.approved_questions,
         'created_at': batch.created_at.isoformat(),
-        'completed_at': batch.completed_at.isoformat() if batch.completed_at else None
+        'completed_at': completed_at.isoformat() if completed_at else None
     })
 
 @import_bp.route('/batches', methods=['GET'])
@@ -311,6 +312,7 @@ def import_single():
         grade=grade,
         knowledge_point=knowledge_point,
         created_by=data.get('created_by', 'admin'),
+        total_questions=len(candidates),
         parsed_questions=len(candidates)
     )
     db.session.add(batch)
@@ -385,6 +387,7 @@ def import_batch():
             parsed_items.append(parsed)
 
         batch.status = 'reviewing'
+        batch.total_questions = len(parsed_items)
         batch.parsed_questions = len(parsed_items)
         db.session.commit()
 
