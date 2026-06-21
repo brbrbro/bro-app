@@ -421,3 +421,116 @@ def my_questions():
             'created_at': q.created_at.strftime('%Y-%m-%d %H:%M')
         } for q in items]
     })
+
+
+@import_bp.route('/parsed/<int:question_id>', methods=['PUT'])
+def update_parsed_question(question_id):
+    data = request.get_json() or {}
+    parsed = db.session.get(ParsedQuestion, question_id)
+    if not parsed:
+        return jsonify({'error': 'not_found'}), 404
+
+    for field in ['content', 'answer', 'explanation', 'subject', 'grade', 'knowledge_point', 'type', 'difficulty']:
+        if field in data:
+            setattr(parsed, field, data[field])
+    if 'options' in data:
+        parsed.options = json.dumps(data.get('options', []), ensure_ascii=False)
+    if 'images' in data:
+        parsed.images = json.dumps(data.get('images', []), ensure_ascii=False)
+    if 'formula_latex' in data:
+        parsed.formula_latex = json.dumps(data.get('formula_latex', []), ensure_ascii=False)
+    if 'formula_images' in data:
+        parsed.formula_images = json.dumps(data.get('formula_images', []), ensure_ascii=False)
+
+    db.session.commit()
+    return jsonify({'success': True, 'question': _serialize_parsed_question(parsed)})
+
+
+@import_bp.route('/parsed/<int:question_id>/split', methods=['POST'])
+def split_parsed_question(question_id):
+    data = request.get_json() or {}
+    parsed = db.session.get(ParsedQuestion, question_id)
+    if not parsed:
+        return jsonify({'error': 'not_found'}), 404
+
+    first = data.get('first', {})
+    second = data.get('second', {})
+    parsed.content = first.get('content', parsed.content)
+    parsed.answer = first.get('answer', parsed.answer)
+    parsed.explanation = first.get('explanation', parsed.explanation)
+
+    created = ParsedQuestion(
+        batch_id=parsed.batch_id,
+        raw_content=json.dumps(second, ensure_ascii=False),
+        content=second.get('content', ''),
+        options=json.dumps(second.get('options', []), ensure_ascii=False),
+        answer=second.get('answer', ''),
+        explanation=second.get('explanation', ''),
+        exam_type=parsed.exam_type,
+        subject=parsed.subject,
+        grade=parsed.grade,
+        knowledge_point=parsed.knowledge_point,
+        type=second.get('type', parsed.type),
+        difficulty=second.get('difficulty', parsed.difficulty),
+        confidence=parsed.confidence,
+        status='pending',
+        source_page=parsed.source_page
+    )
+    db.session.add(created)
+    db.session.commit()
+    return jsonify({'success': True, 'created_id': created.id, 'updated_id': parsed.id})
+
+
+@import_bp.route('/parsed/<int:question_id>/merge', methods=['POST'])
+def merge_parsed_question(question_id):
+    data = request.get_json() or {}
+    target_id = data.get('target_id')
+    source = db.session.get(ParsedQuestion, question_id)
+    target = db.session.get(ParsedQuestion, target_id)
+    if not source or not target:
+        return jsonify({'error': 'not_found'}), 404
+
+    target.content = (target.content or '') + '\n' + (source.content or '')
+    if source.explanation:
+        target.explanation = ((target.explanation or '') + '\n' + source.explanation).strip()
+    source.status = 'rejected'
+    source.review_notes = f'Merged into ParsedQuestion #{target.id}'
+    db.session.commit()
+    return jsonify({'success': True, 'target_id': target.id, 'merged_id': source.id})
+
+
+@import_bp.route('/batch/<int:batch_id>/approve-safe', methods=['POST'])
+def approve_safe_questions(batch_id):
+    data = request.get_json() or {}
+    min_confidence = float(data.get('min_confidence', 0.85))
+    questions = ParsedQuestion.query.filter_by(batch_id=batch_id, status='pending').all()
+    approved_count = 0
+    for parsed in questions:
+        if (parsed.confidence or 0) < min_confidence:
+            continue
+        question = Question(
+            region=data.get('region', 'mainland'),
+            subject=parsed.subject,
+            grade=parsed.grade,
+            knowledge_point=parsed.knowledge_point,
+            type=parsed.type,
+            difficulty=parsed.difficulty,
+            content=parsed.content,
+            answer=parsed.answer,
+            explanation=parsed.explanation,
+            options=parsed.options,
+            source='import',
+            status='approved'
+        )
+        db.session.add(question)
+        parsed.status = 'approved'
+        approved_count += 1
+
+    batch = db.session.get(ImportBatch, batch_id)
+    if batch:
+        batch.approved_questions = (batch.approved_questions or 0) + approved_count
+        if approved_count:
+            batch.status = 'completed'
+
+    db.session.commit()
+    return jsonify({'success': True, 'approved_count': approved_count})
