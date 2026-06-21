@@ -46,6 +46,15 @@ class DocumentPage:
     blocks: List[Dict[str, Any]] = field(default_factory=list)
     page_image_url: str = ''
 
+    def to_dict(self):
+        return {
+            'page': self.page,
+            'text': self.text,
+            'images': [img.to_dict() for img in self.images],
+            'blocks': self.blocks,
+            'page_image_url': self.page_image_url
+        }
+
 
 @dataclass
 class QuestionCandidate:

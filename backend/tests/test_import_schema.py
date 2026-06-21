@@ -85,3 +85,20 @@ def test_question_candidate_to_dict_is_stable():
     assert data['formula_images'] == ['/static/images/f1.png']
     assert data['images'][0]['type'] == 'diagram'
     assert data['confidence'] == 0.8
+
+
+def test_document_page_to_dict_includes_images():
+    from services.import_schema import DocumentPage, ImageAsset
+
+    page = DocumentPage(
+        page=2,
+        text='hello',
+        images=[ImageAsset(path='/tmp/a.png', url='/static/a.png', image_type='embedded')],
+        blocks=[{'text': 'hello'}],
+        page_image_url='/static/page2.png'
+    )
+    data = page.to_dict()
+    assert data['page'] == 2
+    assert data['images'][0]['url'] == '/static/a.png'
+    assert data['blocks'][0]['text'] == 'hello'
+    assert data['page_image_url'] == '/static/page2.png'
