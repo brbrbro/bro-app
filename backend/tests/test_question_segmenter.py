@@ -43,3 +43,23 @@ def test_segment_keeps_source_page():
     pages = [DocumentPage(page=3, text=text)]
     candidates = QuestionSegmenter().segment(pages)
     assert candidates[0].source_page == 3
+
+
+def test_raw_ocr_text_keeps_original_question_number():
+    text = '12. 求 x 的值\n答案：x=1'
+    candidates = QuestionSegmenter().segment([DocumentPage(page=1, text=text)])
+    assert candidates[0].raw_ocr_text.startswith('12.')
+
+
+def test_same_line_answer_and_explanation_are_split_cleanly():
+    text = '1. 1+1=?\nA. 1\nB. 2\n答案：B 解析：1+1=2'
+    candidates = QuestionSegmenter().segment([DocumentPage(page=1, text=text)])
+    assert candidates[0].answer == 'B'
+    assert candidates[0].explanation == '1+1=2'
+
+
+def test_options_support_lowercase_and_fullwidth_letters():
+    text = '1. 选正确项\na. 甲\nＢ. 乙\nC  丙\n答案：B'
+    candidates = QuestionSegmenter().segment([DocumentPage(page=1, text=text)])
+    keys = [opt['key'] for opt in candidates[0].options]
+    assert keys == ['A', 'B', 'C']

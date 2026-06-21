@@ -3,9 +3,11 @@ from services.import_schema import QuestionCandidate
 
 
 QUESTION_SPLIT_RE = re.compile(r'(?:^|\n)\s*(\d+)[\.、．]\s*')
-OPTION_RE = re.compile(r'^\s*([A-D])\s*[\.、．]\s*(.+)$', re.MULTILINE)
-ANSWER_RE = re.compile(r'(?:答案|Answer)\s*[:：]\s*([^\n]+)')
+LEADING_NUMBER_RE = re.compile(r'^\s*(\d+)[\.、．]\s*')
+OPTION_RE = re.compile(r'^\s*([A-Fa-fＡ-Ｆａ-ｆ])\s*[\.、．]?\s*(.+)$', re.MULTILINE)
+ANSWER_RE = re.compile(r'(?:答案|Answer)\s*[:：]\s*([^\n解析]+)')
 EXPLANATION_RE = re.compile(r'(?:解析|Explanation)\s*[:：]\s*([\s\S]+)$')
+FULLWIDTH_MAP = str.maketrans({'Ａ': 'A', 'Ｂ': 'B', 'Ｃ': 'C', 'Ｄ': 'D', 'Ｅ': 'E', 'Ｆ': 'F', 'ａ': 'A', 'ｂ': 'B', 'ｃ': 'C', 'ｄ': 'D', 'ｅ': 'E', 'ｆ': 'F'})
 
 
 class QuestionSegmenter:
@@ -29,7 +31,7 @@ class QuestionSegmenter:
 
         parts = []
         for i, match in enumerate(matches):
-            start = match.end()
+            start = match.start()
             end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
             parts.append(text[start:end].strip())
         return [p for p in parts if p]
@@ -48,9 +50,10 @@ class QuestionSegmenter:
 
         options = []
         for key, text in OPTION_RE.findall(raw):
+            key = key.translate(FULLWIDTH_MAP).upper()
             options.append({'key': key, 'text': text.strip()})
 
-        content = raw
+        content = LEADING_NUMBER_RE.sub('', raw)
         content = ANSWER_RE.sub('', content)
         content = EXPLANATION_RE.sub('', content)
         content = OPTION_RE.sub('', content).strip()
