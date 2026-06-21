@@ -477,6 +477,10 @@ def split_parsed_question(question_id):
         source_page=parsed.source_page
     )
     db.session.add(created)
+    batch = db.session.get(ImportBatch, parsed.batch_id)
+    if batch:
+        batch.total_questions = (batch.total_questions or 0) + 1
+        batch.parsed_questions = (batch.parsed_questions or 0) + 1
     db.session.commit()
     return jsonify({'success': True, 'created_id': created.id, 'updated_id': parsed.id})
 
@@ -485,10 +489,14 @@ def split_parsed_question(question_id):
 def merge_parsed_question(question_id):
     data = request.get_json() or {}
     target_id = data.get('target_id')
+    if target_id == question_id:
+        return jsonify({'error': 'cannot_merge_self'}), 400
     source = db.session.get(ParsedQuestion, question_id)
     target = db.session.get(ParsedQuestion, target_id)
     if not source or not target:
         return jsonify({'error': 'not_found'}), 404
+    if source.batch_id != target.batch_id:
+        return jsonify({'error': 'different_batch'}), 400
 
     target.content = (target.content or '') + '\n' + (source.content or '')
     if source.explanation:
@@ -526,11 +534,14 @@ def approve_safe_questions(batch_id):
         parsed.status = 'approved'
         approved_count += 1
 
+    remaining = ParsedQuestion.query.filter_by(batch_id=batch_id, status='pending').count()
     batch = db.session.get(ImportBatch, batch_id)
     if batch:
         batch.approved_questions = (batch.approved_questions or 0) + approved_count
-        if approved_count:
+        if remaining == 0 and approved_count > 0:
             batch.status = 'completed'
+        else:
+            batch.status = 'reviewing'
 
     db.session.commit()
     return jsonify({'success': True, 'approved_count': approved_count})
