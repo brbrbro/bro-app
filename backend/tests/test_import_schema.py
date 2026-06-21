@@ -83,8 +83,20 @@ def test_question_candidate_to_dict_is_stable():
     assert data['content'] == '求 x^2=4 的解。'
     assert data['formula_latex'] == ['x^2=4']
     assert data['formula_images'] == ['/static/images/f1.png']
+    assert data['formulas'][0]['latex'] == 'x^2=4'
     assert data['images'][0]['type'] == 'diagram'
     assert data['confidence'] == 0.8
+
+
+def test_question_candidate_empty_assets_serialize_safely():
+    from services.import_schema import QuestionCandidate
+
+    data = QuestionCandidate(index=1, content='题干').to_dict()
+    assert data['images'] == []
+    assert data['formula_latex'] == []
+    assert data['formula_images'] == []
+    assert data['formulas'] == []
+    assert data['confidence'] == 0.0
 
 
 def test_document_page_to_dict_includes_images():

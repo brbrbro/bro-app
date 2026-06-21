@@ -11,7 +11,7 @@ class ImageAsset:
     bbox: Optional[Dict[str, Any]] = None
     ocr_text: str = ''
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'path': self.path,
             'url': self.url,
@@ -29,7 +29,7 @@ class FormulaAsset:
     bbox: Optional[Dict[str, Any]] = None
     confidence: float = 0.0
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'latex': self.latex,
             'image_url': self.image_url,
@@ -46,7 +46,7 @@ class DocumentPage:
     blocks: List[Dict[str, Any]] = field(default_factory=list)
     page_image_url: str = ''
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'page': self.page,
             'text': self.text,
@@ -72,12 +72,12 @@ class QuestionCandidate:
     formulas: List[FormulaAsset] = field(default_factory=list)
     confidence_detail: Dict[str, float] = field(default_factory=dict)
 
-    def confidence(self):
+    def confidence(self) -> float:
         if not self.confidence_detail:
             return 0.0
         return round(sum(self.confidence_detail.values()) / len(self.confidence_detail), 3)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'index': self.index,
             'content': self.content,
@@ -92,7 +92,7 @@ class QuestionCandidate:
             'images': [img.to_dict() for img in self.images],
             'formula_latex': [f.latex for f in self.formulas if f.latex],
             'formula_images': [f.image_url for f in self.formulas if f.image_url],
-            'formula_detail': [f.to_dict() for f in self.formulas],
+            'formulas': [f.to_dict() for f in self.formulas],
             'confidence_detail': self.confidence_detail,
             'confidence': self.confidence()
         }
