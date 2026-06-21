@@ -21,6 +21,17 @@ def test_single_text_import_creates_one_parsed_question(client):
     assert status['total_questions'] == 1
     assert status['parsed_questions'] == 1
 
+    detail_resp = client.get(f"/api/import/batch/{data['batch_id']}")
+    assert detail_resp.status_code == 200
+    assert detail_resp.get_json()['id'] == data['batch_id']
+
+    questions_resp = client.get(f"/api/import/batch/{data['batch_id']}/questions")
+    assert questions_resp.status_code == 200
+    question = questions_resp.get_json()['questions'][0]
+    assert 'raw_ocr_text' in question
+    assert 'formula_latex' in question
+    assert 'confidence_detail' in question
+
 
 def test_single_import_requires_subject(client):
     resp = client.post('/api/import/single', json={'text': '1. hi'})

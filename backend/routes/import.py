@@ -204,6 +204,29 @@ def get_batches():
         'total': batches.total
     })
 
+@import_bp.route('/batch/<int:batch_id>', methods=['GET'])
+def get_batch_detail(batch_id):
+    batch = db.session.get(ImportBatch, batch_id)
+    if not batch:
+        abort(404)
+    completed_at = getattr(batch, 'completed_at', None)
+    return jsonify({
+        'id': batch.id,
+        'status': batch.status,
+        'source_type': batch.source_type,
+        'source_file': batch.source_file,
+        'exam_type': batch.exam_type,
+        'subject': batch.subject,
+        'grade': batch.grade,
+        'knowledge_point': batch.knowledge_point,
+        'total_questions': batch.total_questions,
+        'parsed_questions': batch.parsed_questions,
+        'approved_questions': batch.approved_questions,
+        'created_at': batch.created_at.isoformat(),
+        'completed_at': completed_at.isoformat() if completed_at else None
+    })
+
+
 @import_bp.route('/batch/<int:batch_id>/questions', methods=['GET'])
 def get_batch_questions(batch_id):
     status = request.args.get('status', 'pending')
@@ -214,21 +237,7 @@ def get_batch_questions(batch_id):
     ).all()
     
     return jsonify({
-        'questions': [{
-            'id': q.id,
-            'content': q.content,
-            'options': json.loads(q.options) if q.options else [],
-            'answer': q.answer,
-            'explanation': q.explanation,
-            'exam_type': q.exam_type,
-            'subject': q.subject,
-            'grade': q.grade,
-            'knowledge_point': q.knowledge_point,
-            'type': q.type,
-            'difficulty': q.difficulty,
-            'confidence': q.confidence,
-            'status': q.status
-        } for q in questions]
+        'questions': [_serialize_parsed_question(q) for q in questions]
     })
 
 @import_bp.route('/question/<int:question_id>/approve', methods=['POST'])
@@ -268,7 +277,10 @@ def approve_question(question_id):
     
     batch = db.session.get(ImportBatch, parsed.batch_id)
     if batch:
-        batch.approved_questions += 1
+        batch.approved_questions = (batch.approved_questions or 0) + 1
+        remaining = ParsedQuestion.query.filter_by(batch_id=batch.id, status='pending').count()
+        if remaining == 0:
+            batch.status = 'completed'
     
     db.session.commit()
     
@@ -464,6 +476,18 @@ def split_parsed_question(question_id):
     parsed.content = first.get('content', parsed.content)
     parsed.answer = first.get('answer', parsed.answer)
     parsed.explanation = first.get('explanation', parsed.explanation)
+    if 'options' in first:
+        parsed.options = json.dumps(first.get('options', []), ensure_ascii=False)
+    if 'type' in first:
+        parsed.type = first.get('type')
+    if 'difficulty' in first:
+        parsed.difficulty = first.get('difficulty')
+    if 'images' in first:
+        parsed.images = json.dumps(first.get('images', []), ensure_ascii=False)
+    if 'formula_latex' in first:
+        parsed.formula_latex = json.dumps(first.get('formula_latex', []), ensure_ascii=False)
+    if 'formula_images' in first:
+        parsed.formula_images = json.dumps(first.get('formula_images', []), ensure_ascii=False)
 
     created = ParsedQuestion(
         batch_id=parsed.batch_id,
@@ -478,9 +502,15 @@ def split_parsed_question(question_id):
         knowledge_point=parsed.knowledge_point,
         type=second.get('type', parsed.type),
         difficulty=second.get('difficulty', parsed.difficulty),
-        confidence=parsed.confidence,
+        confidence=second.get('confidence', parsed.confidence),
         status='pending',
-        source_page=parsed.source_page
+        source_page=second.get('source_page', parsed.source_page),
+        bbox=json.dumps(second.get('bbox'), ensure_ascii=False),
+        images=json.dumps(second.get('images', []), ensure_ascii=False),
+        formula_latex=json.dumps(second.get('formula_latex', []), ensure_ascii=False),
+        formula_images=json.dumps(second.get('formula_images', []), ensure_ascii=False),
+        raw_ocr_text=second.get('raw_ocr_text', ''),
+        confidence_detail=json.dumps(second.get('confidence_detail', {}), ensure_ascii=False)
     )
     db.session.add(created)
     batch = db.session.get(ImportBatch, parsed.batch_id)
@@ -507,6 +537,12 @@ def merge_parsed_question(question_id):
     target.content = (target.content or '') + '\n' + (source.content or '')
     if source.explanation:
         target.explanation = ((target.explanation or '') + '\n' + source.explanation).strip()
+    if source.raw_ocr_text:
+        target.raw_ocr_text = ((target.raw_ocr_text or '') + '\n' + source.raw_ocr_text).strip()
+    for field in ['images', 'formula_latex', 'formula_images']:
+        target_items = json.loads(getattr(target, field) or '[]')
+        source_items = json.loads(getattr(source, field) or '[]')
+        setattr(target, field, json.dumps(target_items + source_items, ensure_ascii=False))
     source.status = 'rejected'
     source.review_notes = f'Merged into ParsedQuestion #{target.id}'
     db.session.commit()
@@ -517,6 +553,9 @@ def merge_parsed_question(question_id):
 def approve_safe_questions(batch_id):
     data = request.get_json() or {}
     min_confidence = float(data.get('min_confidence', 0.85))
+    batch = db.session.get(ImportBatch, batch_id)
+    if not batch:
+        return jsonify({'error': 'not_found'}), 404
     questions = ParsedQuestion.query.filter_by(batch_id=batch_id, status='pending').all()
     approved_count = 0
     for parsed in questions:
@@ -541,13 +580,11 @@ def approve_safe_questions(batch_id):
         approved_count += 1
 
     remaining = ParsedQuestion.query.filter_by(batch_id=batch_id, status='pending').count()
-    batch = db.session.get(ImportBatch, batch_id)
-    if batch:
-        batch.approved_questions = (batch.approved_questions or 0) + approved_count
-        if remaining == 0 and approved_count > 0:
-            batch.status = 'completed'
-        else:
-            batch.status = 'reviewing'
+    batch.approved_questions = (batch.approved_questions or 0) + approved_count
+    if remaining == 0 and approved_count > 0:
+        batch.status = 'completed'
+    else:
+        batch.status = 'reviewing'
 
     db.session.commit()
     return jsonify({'success': True, 'approved_count': approved_count})

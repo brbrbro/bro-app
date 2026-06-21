@@ -127,3 +127,90 @@ def test_approve_safe_approves_high_confidence(client, app):
     resp = client.post(f'/api/import/batch/{batch_id}/approve-safe', json={'min_confidence': 0.8})
     assert resp.status_code == 200
     assert resp.get_json()['approved_count'] == 1
+
+
+def test_approve_safe_missing_batch_returns_404(client):
+    resp = client.post('/api/import/batch/999/approve-safe', json={'min_confidence': 0.8})
+    assert resp.status_code == 404
+    assert resp.get_json()['error'] == 'not_found'
+
+
+def test_split_preserves_first_metadata_and_second_metadata(client, app):
+    batch_id, pid = _create_parsed(app)
+    resp = client.post(f'/api/import/parsed/{pid}/split', json={
+        'first': {
+            'content': '第一题',
+            'answer': 'A',
+            'options': [{'key': 'A', 'text': '甲'}],
+            'type': 'choice',
+            'difficulty': 2,
+            'formula_latex': ['x^2=4'],
+            'formula_images': ['/static/f1.png'],
+            'images': [{'url': '/static/i1.png'}]
+        },
+        'second': {
+            'content': '第二题',
+            'answer': 'B',
+            'options': [{'key': 'B', 'text': '乙'}],
+            'type': 'choice',
+            'difficulty': 3,
+            'formula_latex': ['y=1'],
+            'formula_images': ['/static/f2.png'],
+            'images': [{'url': '/static/i2.png'}],
+            'raw_ocr_text': '2. 第二题',
+            'confidence_detail': {'text': 0.8}
+        }
+    })
+    assert resp.status_code == 200
+    created_id = resp.get_json()['created_id']
+
+    from models import db, ParsedQuestion
+    with app.app_context():
+        first = db.session.get(ParsedQuestion, pid)
+        second = db.session.get(ParsedQuestion, created_id)
+        assert json.loads(first.options)[0]['key'] == 'A'
+        assert json.loads(first.formula_latex) == ['x^2=4']
+        assert json.loads(second.options)[0]['key'] == 'B'
+        assert json.loads(second.formula_latex) == ['y=1']
+        assert second.raw_ocr_text == '2. 第二题'
+
+
+def test_merge_preserves_source_metadata(client, app):
+    batch_id, pid1 = _create_parsed(app)
+    from models import db, ParsedQuestion
+    with app.app_context():
+        source = ParsedQuestion(
+            batch_id=batch_id,
+            raw_content='{}',
+            content='source content',
+            options=json.dumps([]),
+            answer='B',
+            explanation='source explanation',
+            exam_type='gaokao',
+            subject='数学',
+            grade='高一',
+            knowledge_point='计算',
+            type='blank',
+            difficulty=1,
+            confidence=0.9,
+            status='pending',
+            raw_ocr_text='2. source raw',
+            images=json.dumps([{'url': '/static/i2.png'}]),
+            formula_latex=json.dumps(['z=3']),
+            formula_images=json.dumps(['/static/f3.png'])
+        )
+        db.session.add(source)
+        db.session.commit()
+        pid2 = source.id
+
+    resp = client.post(f'/api/import/parsed/{pid2}/merge', json={'target_id': pid1})
+    assert resp.status_code == 200
+
+    with app.app_context():
+        target = db.session.get(ParsedQuestion, pid1)
+        merged = db.session.get(ParsedQuestion, pid2)
+        assert 'source content' in target.content
+        assert 'source raw' in target.raw_ocr_text
+        assert json.loads(target.images)[0]['url'] == '/static/i2.png'
+        assert json.loads(target.formula_latex) == ['z=3']
+        assert merged.status == 'rejected'
