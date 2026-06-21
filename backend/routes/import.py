@@ -1,6 +1,6 @@
 ﻿import os
 import json
-from flask import request, jsonify
+from flask import request, jsonify, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from models import db, ImportBatch, ParsedQuestion, Question
@@ -156,7 +156,9 @@ def upload_file():
 
 @import_bp.route('/status/<int:batch_id>', methods=['GET'])
 def get_batch_status(batch_id):
-    batch = ImportBatch.query.get_or_404(batch_id)
+    batch = db.session.get(ImportBatch, batch_id)
+    if not batch:
+        abort(404)
     completed_at = getattr(batch, 'completed_at', None)
     
     return jsonify({
@@ -233,7 +235,9 @@ def get_batch_questions(batch_id):
 def approve_question(question_id):
     data = request.get_json()
     
-    parsed = ParsedQuestion.query.get_or_404(question_id)
+    parsed = db.session.get(ParsedQuestion, question_id)
+    if not parsed:
+        abort(404)
     
     parsed.content = data.get('content', parsed.content)
     parsed.options = json.dumps(data.get('options', []))
@@ -262,7 +266,7 @@ def approve_question(question_id):
     )
     db.session.add(question)
     
-    batch = ImportBatch.query.get(parsed.batch_id)
+    batch = db.session.get(ImportBatch, parsed.batch_id)
     if batch:
         batch.approved_questions += 1
     
@@ -274,7 +278,9 @@ def approve_question(question_id):
 def reject_question(question_id):
     data = request.get_json()
     
-    parsed = ParsedQuestion.query.get_or_404(question_id)
+    parsed = db.session.get(ParsedQuestion, question_id)
+    if not parsed:
+        abort(404)
     parsed.status = 'rejected'
     parsed.review_notes = data.get('notes', '')
     

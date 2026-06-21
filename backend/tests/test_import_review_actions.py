@@ -82,9 +82,9 @@ def test_split_updates_batch_counts(client, app):
         'second': {'content': '2+2=?', 'answer': '4'}
     })
     assert resp.status_code == 200
-    from models import ImportBatch
+    from models import db, ImportBatch
     with app.app_context():
-        batch = ImportBatch.query.get(batch_id)
+        batch = db.session.get(ImportBatch, batch_id)
         assert batch.total_questions == 1
         assert batch.parsed_questions == 1
 
@@ -118,7 +118,7 @@ def test_approve_safe_keeps_reviewing_when_pending_remain(client, app):
     resp = client.post(f'/api/import/batch/{batch_id}/approve-safe', json={'min_confidence': 0.8})
     assert resp.status_code == 200
     with app.app_context():
-        batch = ImportBatch.query.get(batch_id)
+        batch = db.session.get(ImportBatch, batch_id)
         assert batch.status == 'reviewing'
 
 
