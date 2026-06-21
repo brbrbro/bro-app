@@ -139,6 +139,7 @@ def upload_file():
         
         batch.status = 'reviewing'
         batch.parsed_questions = len(questions)
+        batch.total_questions = len(questions)
         db.session.commit()
         
         return jsonify({
