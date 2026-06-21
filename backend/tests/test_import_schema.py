@@ -36,3 +36,25 @@ def test_parsed_question_supports_recognition_metadata(client, app):
         assert saved.raw_ocr_text == '1. 已知 x^2=4，求 x。'
         assert json.loads(saved.formula_images) == ['/static/images/formula-1.png']
         assert json.loads(saved.confidence_detail)['formula'] == 0.82
+
+
+def test_import_recognition_migration_adds_missing_columns(tmp_path, monkeypatch):
+    import sqlite3
+    import migrate_import_recognition as mig
+
+    db_path = tmp_path / 'bro.db'
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute('CREATE TABLE parsed_questions (id INTEGER PRIMARY KEY, images TEXT)')
+    conn.commit()
+    conn.close()
+
+    monkeypatch.setattr(mig, 'DB_PATH', str(db_path))
+    mig.main()
+
+    conn = sqlite3.connect(db_path)
+    cols = [row[1] for row in conn.execute('PRAGMA table_info(parsed_questions)').fetchall()]
+    conn.close()
+
+    for name, _ in mig.COLUMNS:
+        assert name in cols

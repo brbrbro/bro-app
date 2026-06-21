@@ -1,3 +1,4 @@
+import os
 import sqlite3
 
 DB_PATH = 'C:/bro-dev/bro.db'
@@ -18,6 +19,11 @@ def column_exists(cur, table, column):
 
 
 def main():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    if not os.path.exists(DB_PATH):
+        print('DB not found at C:/bro-dev/bro.db; app db.create_all() will create fresh schema')
+        return
+
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='parsed_questions'")
