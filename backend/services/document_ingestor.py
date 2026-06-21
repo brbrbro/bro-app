@@ -5,8 +5,13 @@ from services.file_processor import FileProcessor
 
 
 class DocumentIngestor:
-    def __init__(self):
-        self.processor = FileProcessor()
+    def __init__(self, processor=None):
+        self.processor = processor
+
+    def _processor(self):
+        if self.processor is None:
+            self.processor = FileProcessor()
+        return self.processor
 
     def ingest(self, file_path, file_type):
         file_type = file_type.lower()
@@ -25,8 +30,8 @@ class DocumentIngestor:
 
     def _ingest_image(self, file_path):
         filename = os.path.basename(file_path)
-        image = Image.open(file_path)
-        image.verify()
+        with Image.open(file_path) as image:
+            image.verify()
         asset = ImageAsset(
             path=file_path,
             url=f'/uploads/{filename}',
@@ -36,7 +41,7 @@ class DocumentIngestor:
         return [DocumentPage(page=1, text='', images=[asset], blocks=[], page_image_url=asset.url)]
 
     def _ingest_via_file_processor(self, file_path, file_type):
-        result = self.processor.process_file(file_path, file_type)
+        result = self._processor().process_file(file_path, file_type)
         images_by_page = {}
         for img in result.get('images', []):
             page = img.get('page', 1)

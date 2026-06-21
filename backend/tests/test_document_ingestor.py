@@ -1,6 +1,24 @@
 from services.document_ingestor import DocumentIngestor
 
 
+class FakeProcessor:
+    def process_file(self, file_path, file_type):
+        return {
+            'text_content': [{'page': 2, 'text': '2. 测试题\n答案：A'}],
+            'images': [{'page': 2, 'path': '/tmp/img.png', 'url': '/static/images/img.png'}]
+        }
+
+
+def test_ingest_pdf_delegates_to_processor_and_maps_embedded_images():
+    pages = DocumentIngestor(processor=FakeProcessor()).ingest('/tmp/fake.pdf', 'pdf')
+    assert len(pages) == 1
+    assert pages[0].page == 2
+    assert '测试题' in pages[0].text
+    assert len(pages[0].images) == 1
+    assert pages[0].images[0].image_type == 'embedded'
+    assert pages[0].images[0].url == '/static/images/img.png'
+
+
 def test_ingest_txt_file(tmp_path):
     p = tmp_path / 'questions.txt'
     p.write_text('1. 1+1=?\n答案：2', encoding='utf-8')
