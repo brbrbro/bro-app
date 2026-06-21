@@ -37,6 +37,29 @@ def test_update_parsed_question(client, app):
     assert body['question']['answer'] == '4'
 
 
+def test_manual_approve_completes_batch_when_no_pending_remain(client, app):
+    from models import db, ImportBatch, Question
+    batch_id, pid = _create_parsed(app)
+    resp = client.post(f'/api/import/question/{pid}/approve', json={
+        'content': '1+1=?',
+        'options': [],
+        'answer': '2',
+        'explanation': '',
+        'subject': '数学',
+        'grade': '高一',
+        'knowledge_point': '计算',
+        'type': 'blank',
+        'difficulty': 1,
+        'region': 'mainland'
+    })
+    assert resp.status_code == 200
+    with app.app_context():
+        batch = db.session.get(ImportBatch, batch_id)
+        assert batch.status == 'completed'
+        assert batch.approved_questions == 1
+        assert Question.query.count() == 1
+
+
 def test_split_parsed_question(client, app):
     _, pid = _create_parsed(app)
     resp = client.post(f'/api/import/parsed/{pid}/split', json={
