@@ -24,3 +24,15 @@ def test_pipeline_marks_image_only_as_low_confidence_candidate(tmp_path):
     assert len(candidates) == 1
     assert candidates[0].confidence_detail['text'] < 0.5
     assert candidates[0].images[0].url == '/x.png'
+
+
+def test_pipeline_preserves_page_order_for_mixed_pages():
+    from services.import_schema import ImageAsset
+
+    pages = [
+        DocumentPage(page=1, text='1. 第一题\n答案：A'),
+        DocumentPage(page=2, text='', images=[ImageAsset(path='img.png', url='/img.png', image_type='source_image')]),
+        DocumentPage(page=3, text='2. 第三页题\n答案：B')
+    ]
+    candidates = RecognitionPipeline().recognize(pages)
+    assert [c.source_page for c in candidates] == [1, 2, 3]

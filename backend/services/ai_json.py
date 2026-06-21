@@ -4,7 +4,7 @@ import re
 
 def parse_ai_questions_json(text):
     cleaned = text.strip()
-    cleaned = re.sub(r'^```(?:json)?', '', cleaned).strip()
+    cleaned = re.sub(r'^```\s*(?:json)?', '', cleaned, flags=re.IGNORECASE).strip()
     cleaned = re.sub(r'```$', '', cleaned).strip()
 
     match = re.search(r'\[[\s\S]*\]', cleaned)
