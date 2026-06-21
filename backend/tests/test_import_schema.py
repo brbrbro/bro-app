@@ -33,4 +33,6 @@ def test_parsed_question_supports_recognition_metadata(client, app):
         assert saved.source_page == 1
         assert json.loads(saved.bbox)['w'] == 300
         assert json.loads(saved.formula_latex) == ['x^2=4']
+        assert saved.raw_ocr_text == '1. 已知 x^2=4，求 x。'
+        assert json.loads(saved.formula_images) == ['/static/images/formula-1.png']
         assert json.loads(saved.confidence_detail)['formula'] == 0.82
