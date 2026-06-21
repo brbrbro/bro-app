@@ -482,12 +482,20 @@ def split_parsed_question(question_id):
         parsed.type = first.get('type')
     if 'difficulty' in first:
         parsed.difficulty = first.get('difficulty')
+    if 'source_page' in first:
+        parsed.source_page = first.get('source_page')
+    if 'bbox' in first:
+        parsed.bbox = json.dumps(first.get('bbox'), ensure_ascii=False)
     if 'images' in first:
         parsed.images = json.dumps(first.get('images', []), ensure_ascii=False)
     if 'formula_latex' in first:
         parsed.formula_latex = json.dumps(first.get('formula_latex', []), ensure_ascii=False)
     if 'formula_images' in first:
         parsed.formula_images = json.dumps(first.get('formula_images', []), ensure_ascii=False)
+    if 'raw_ocr_text' in first:
+        parsed.raw_ocr_text = first.get('raw_ocr_text')
+    if 'confidence_detail' in first:
+        parsed.confidence_detail = json.dumps(first.get('confidence_detail', {}), ensure_ascii=False)
 
     created = ParsedQuestion(
         batch_id=parsed.batch_id,
@@ -539,10 +547,19 @@ def merge_parsed_question(question_id):
         target.explanation = ((target.explanation or '') + '\n' + source.explanation).strip()
     if source.raw_ocr_text:
         target.raw_ocr_text = ((target.raw_ocr_text or '') + '\n' + source.raw_ocr_text).strip()
+    if not target.source_page and source.source_page:
+        target.source_page = source.source_page
+    if not target.bbox and source.bbox:
+        target.bbox = source.bbox
     for field in ['images', 'formula_latex', 'formula_images']:
         target_items = json.loads(getattr(target, field) or '[]')
         source_items = json.loads(getattr(source, field) or '[]')
         setattr(target, field, json.dumps(target_items + source_items, ensure_ascii=False))
+    target_conf = json.loads(target.confidence_detail or '{}')
+    source_conf = json.loads(source.confidence_detail or '{}')
+    for key, value in source_conf.items():
+        target_conf[f'merged_{key}'] = value
+    target.confidence_detail = json.dumps(target_conf, ensure_ascii=False)
     source.status = 'rejected'
     source.review_notes = f'Merged into ParsedQuestion #{target.id}'
     db.session.commit()

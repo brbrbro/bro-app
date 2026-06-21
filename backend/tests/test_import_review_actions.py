@@ -169,7 +169,11 @@ def test_split_preserves_first_metadata_and_second_metadata(client, app):
             'difficulty': 2,
             'formula_latex': ['x^2=4'],
             'formula_images': ['/static/f1.png'],
-            'images': [{'url': '/static/i1.png'}]
+            'images': [{'url': '/static/i1.png'}],
+            'source_page': 5,
+            'bbox': {'x': 1, 'y': 2, 'w': 3, 'h': 4},
+            'raw_ocr_text': '1. 第一题',
+            'confidence_detail': {'text': 0.9}
         },
         'second': {
             'content': '第二题',
@@ -193,6 +197,10 @@ def test_split_preserves_first_metadata_and_second_metadata(client, app):
         second = db.session.get(ParsedQuestion, created_id)
         assert json.loads(first.options)[0]['key'] == 'A'
         assert json.loads(first.formula_latex) == ['x^2=4']
+        assert first.source_page == 5
+        assert json.loads(first.bbox)['w'] == 3
+        assert json.loads(first.confidence_detail)['text'] == 0.9
+        assert first.raw_ocr_text == '1. 第一题'
         assert json.loads(second.options)[0]['key'] == 'B'
         assert json.loads(second.formula_latex) == ['y=1']
         assert second.raw_ocr_text == '2. 第二题'
@@ -217,10 +225,13 @@ def test_merge_preserves_source_metadata(client, app):
             difficulty=1,
             confidence=0.9,
             status='pending',
+            source_page=9,
+            bbox=json.dumps({'x': 9, 'y': 8, 'w': 7, 'h': 6}),
             raw_ocr_text='2. source raw',
             images=json.dumps([{'url': '/static/i2.png'}]),
             formula_latex=json.dumps(['z=3']),
-            formula_images=json.dumps(['/static/f3.png'])
+            formula_images=json.dumps(['/static/f3.png']),
+            confidence_detail=json.dumps({'text': 0.55})
         )
         db.session.add(source)
         db.session.commit()
@@ -234,6 +245,9 @@ def test_merge_preserves_source_metadata(client, app):
         merged = db.session.get(ParsedQuestion, pid2)
         assert 'source content' in target.content
         assert 'source raw' in target.raw_ocr_text
+        assert target.source_page == 9
+        assert json.loads(target.bbox)['w'] == 7
         assert json.loads(target.images)[0]['url'] == '/static/i2.png'
         assert json.loads(target.formula_latex) == ['z=3']
+        assert json.loads(target.confidence_detail)['merged_text'] == 0.55
         assert merged.status == 'rejected'
