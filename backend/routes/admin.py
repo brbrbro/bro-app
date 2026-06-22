@@ -76,6 +76,38 @@ def _group_batches(field):
     return [{'key': key or '未设置', 'count': count} for key, count in rows]
 
 
+@admin_bp.route('/import/batches/<int:batch_id>', methods=['GET'])
+def admin_import_batch_detail(batch_id):
+    batch = db.session.get(ImportBatch, batch_id)
+    if not batch:
+        return jsonify({'error': 'not_found'}), 404
+    return jsonify(_batch_to_dict(batch))
+
+
+@admin_bp.route('/import/batches/<int:batch_id>', methods=['DELETE'])
+def admin_delete_import_batch(batch_id):
+    batch = db.session.get(ImportBatch, batch_id)
+    if not batch:
+        return jsonify({'error': 'not_found'}), 404
+    ParsedQuestion.query.filter_by(batch_id=batch_id).delete(synchronize_session=False)
+    db.session.delete(batch)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@admin_bp.route('/import/batches/<int:batch_id>/reparse', methods=['POST'])
+def admin_reparse_import_batch(batch_id):
+    batch = db.session.get(ImportBatch, batch_id)
+    if not batch:
+        return jsonify({'error': 'not_found'}), 404
+    if not batch.source_url:
+        return jsonify({'error': 'source_file_missing'}), 400
+    import os
+    if not os.path.exists(batch.source_url):
+        return jsonify({'error': 'source_file_missing'}), 400
+    return jsonify({'success': False, 'error': 'reparse_requires_worker'}), 400
+
+
 @admin_bp.route('/import/stats', methods=['GET'])
 def admin_import_stats():
     batches = ImportBatch.query.all()
