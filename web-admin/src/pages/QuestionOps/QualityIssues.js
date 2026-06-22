@@ -5,6 +5,18 @@ import { archiveAdminQuestion, deleteAdminQuestion, getQualityIssues } from '../
 import './QualityIssues.css';
 
 const { Option } = Select;
+const IGNORED_KEY = 'bro_admin_ignored_quality_issues';
+
+const issueKey = (issue) => `${issue.issue_type}:${issue.question_id || issue.parsed_question_id || ''}:${issue.content || ''}`;
+
+const getIgnoredKeys = () => {
+  try {
+    const keys = JSON.parse(localStorage.getItem(IGNORED_KEY) || '[]');
+    return Array.isArray(keys) ? keys : [];
+  } catch (e) {
+    return [];
+  }
+};
 
 const issueTypes = [
   'missing_answer',
@@ -25,7 +37,8 @@ const QualityIssuesPage = () => {
     setLoading(true);
     try {
       const res = await getQualityIssues(form.getFieldsValue());
-      setIssues(res.data.issues || res.data.items || []);
+      const ignoredKeys = getIgnoredKeys();
+      setIssues((res.data.issues || res.data.items || []).filter(issue => !ignoredKeys.includes(issueKey(issue))));
     } catch (e) {
       message.error(e.response?.data?.error || '加载质量问题失败');
     } finally {
@@ -56,7 +69,12 @@ const QualityIssuesPage = () => {
   };
 
   const handleIgnore = (row) => {
-    setIssues(items => items.filter(item => item !== row));
+    const key = issueKey(row);
+    const ignoredKeys = getIgnoredKeys();
+    if (!ignoredKeys.includes(key)) {
+      localStorage.setItem(IGNORED_KEY, JSON.stringify([...ignoredKeys, key]));
+    }
+    setIssues(items => items.filter(item => issueKey(item) !== key));
     message.success('已忽略');
   };
 
