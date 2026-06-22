@@ -206,12 +206,13 @@ def test_admin_quality_invalid_options_only_for_choice_with_too_few_options(clie
 
 def test_admin_quality_unknown_type_allows_valid_contract_types(client, app):
     _make_question(app, content='有效选择', type='choice', options='["A", "B"]')
-    _make_question(app, content='未知类型', type='single')
+    _make_question(app, content='未知类型', type='unknown')
+    _make_question(app, content='非合同类型', type='single')
     resp = client.get('/api/admin/quality/issues?issue_type=unknown_type')
     assert resp.status_code == 200
     issues = resp.get_json()['issues']
-    assert len(issues) == 1
-    assert issues[0]['content'] == '未知类型'
+    assert len(issues) == 2
+    assert {item['content'] for item in issues} == {'未知类型', '非合同类型'}
 
 
 def test_admin_import_stats_counts_batches(client, app):
@@ -244,7 +245,7 @@ def test_admin_import_stats_filters_by_created_at_date(client, app):
         db.session.get(ImportBatch, old_id).created_at = datetime(2023, 1, 1, tzinfo=timezone.utc)
         db.session.get(ImportBatch, new_id).created_at = datetime(2024, 1, 1, tzinfo=timezone.utc)
         db.session.commit()
-    resp = client.get('/api/admin/import/stats?start_date=2024-01-01&end_date=2024-01-02&group_by=day')
+    resp = client.get('/api/admin/import/stats?start=2024-01-01&end=2024-01-02&group_by=day')
     assert resp.status_code == 200
     data = resp.get_json()
     assert data['totals']['batches'] == 1

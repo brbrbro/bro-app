@@ -262,7 +262,7 @@ def admin_quality_issues():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
     issues = []
-    valid_types = {'choice', 'blank', 'comprehensive', 'unknown'}
+    valid_types = {'choice', 'blank', 'comprehensive'}
 
     for q in Question.query.all():
         if not q.answer:
@@ -277,7 +277,7 @@ def admin_quality_issues():
             except json.JSONDecodeError:
                 issues.append(_issue('invalid_options', q, 'high', 'Store options as a valid JSON list'))
         if q.type not in valid_types:
-            issues.append(_issue('unknown_type', q, 'medium', 'Use choice, blank, comprehensive, or unknown'))
+            issues.append(_issue('unknown_type', q, 'medium', 'Use choice, blank, or comprehensive'))
         if not q.subject or not q.grade or not q.knowledge_point:
             issues.append(_issue('missing_taxonomy', q, 'medium', 'Fill subject, grade, and knowledge point'))
 
@@ -314,8 +314,8 @@ def admin_quality_issues():
 
 @admin_bp.route('/import/stats', methods=['GET'])
 def admin_import_stats():
-    start_date = _parse_date(request.args.get('start_date'))
-    end_date = _parse_date(request.args.get('end_date'))
+    start_date = _parse_date(request.args.get('start_date') or request.args.get('start'))
+    end_date = _parse_date(request.args.get('end_date') or request.args.get('end'))
     group_by = request.args.get('group_by')
     batch_query = ImportBatch.query
     if start_date:
