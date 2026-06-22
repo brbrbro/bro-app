@@ -32,15 +32,16 @@ const ImportStatsPage = () => {
     { title: '批均题数', key: 'average_questions_per_batch' }
   ];
 
-  const listToRows = (value) => Array.isArray(value) ? value : Object.entries(value || {}).map(([name, count]) => ({ name, count }));
+  const listToRows = (value) => Array.isArray(value) ? value : Object.entries(value || {}).map(([key, count]) => ({ key, count }));
 
   const simpleColumns = [
-    { title: '分类', dataIndex: 'name', key: 'name' },
+    { title: '分类', dataIndex: 'key', key: 'key' },
     { title: '数量', dataIndex: 'count', key: 'count' }
   ];
 
   const formatValue = (card) => {
-    const value = stats[card.key] || 0;
+    const totals = stats.totals || {};
+    const value = totals[card.key] || 0;
     if (card.suffix === '%') return Math.round(Number(value) * 100);
     return value;
   };
@@ -59,17 +60,17 @@ const ImportStatsPage = () => {
       <Row gutter={[16, 16]}>
         <Col xs={24} md={8}>
           <Card title="按状态" loading={loading}>
-            <Table rowKey="name" columns={simpleColumns} dataSource={listToRows(stats.by_status)} pagination={false} />
+            <Table rowKey="key" columns={simpleColumns} dataSource={listToRows(stats.by_status)} pagination={false} />
           </Card>
         </Col>
         <Col xs={24} md={8}>
           <Card title="按科目" loading={loading}>
-            <Table rowKey="name" columns={simpleColumns} dataSource={listToRows(stats.by_subject)} pagination={false} />
+            <Table rowKey="key" columns={simpleColumns} dataSource={listToRows(stats.by_subject)} pagination={false} />
           </Card>
         </Col>
         <Col xs={24} md={8}>
           <Card title="按来源类型" loading={loading}>
-            <Table rowKey="name" columns={simpleColumns} dataSource={listToRows(stats.by_source_type)} pagination={false} />
+            <Table rowKey="key" columns={simpleColumns} dataSource={listToRows(stats.by_source_type)} pagination={false} />
           </Card>
         </Col>
       </Row>
