@@ -104,3 +104,26 @@ def test_admin_question_archive_and_delete(client, app):
     assert archive.get_json()['question']['status'] == 'archived'
     delete = client.delete(f'/api/admin/questions/{qid}')
     assert delete.status_code == 200
+
+
+def test_admin_quality_detects_missing_answer_and_explanation(client, app):
+    _make_question(app, content='缺答案题')
+    from models import db, Question
+    with app.app_context():
+        q = Question.query.filter_by(content='缺答案题').first()
+        q.answer = ''
+        q.explanation = ''
+        db.session.commit()
+    resp = client.get('/api/admin/quality/issues')
+    assert resp.status_code == 200
+    issue_types = [i['issue_type'] for i in resp.get_json()['issues']]
+    assert 'missing_answer' in issue_types
+    assert 'missing_explanation' in issue_types
+
+
+def test_admin_quality_detects_duplicate_content(client, app):
+    _make_question(app, content='重复题')
+    _make_question(app, content='重复题')
+    resp = client.get('/api/admin/quality/issues?issue_type=duplicate_content')
+    assert resp.status_code == 200
+    assert resp.get_json()['issues'][0]['issue_type'] == 'duplicate_content'

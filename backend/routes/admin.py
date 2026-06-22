@@ -196,6 +196,59 @@ def admin_archive_question(question_id):
     return jsonify({'question': _question_to_dict(q)})
 
 
+def _issue(issue_type, question, message):
+    return {
+        'issue_type': issue_type,
+        'question_id': question.id,
+        'content': question.content,
+        'subject': question.subject,
+        'status': question.status,
+        'message': message
+    }
+
+
+@admin_bp.route('/quality/issues', methods=['GET'])
+def admin_quality_issues():
+    issue_type = request.args.get('issue_type')
+    issues = []
+    valid_types = {'single', 'multiple', 'blank', 'essay', 'true_false'}
+
+    for q in Question.query.all():
+        if not q.answer:
+            issues.append(_issue('missing_answer', q, 'Missing answer'))
+        if not q.explanation:
+            issues.append(_issue('missing_explanation', q, 'Missing explanation'))
+        try:
+            options = json.loads(q.options) if q.options else []
+            if not isinstance(options, list):
+                issues.append(_issue('invalid_options', q, 'Options must be a list'))
+        except json.JSONDecodeError:
+            issues.append(_issue('invalid_options', q, 'Options JSON is invalid'))
+        if q.type not in valid_types:
+            issues.append(_issue('unknown_type', q, 'Question type is unknown'))
+        if not q.subject or not q.grade or not q.knowledge_point:
+            issues.append(_issue('missing_taxonomy', q, 'Missing taxonomy fields'))
+
+    duplicates = db.session.query(Question.content).group_by(Question.content).having(func.count(Question.id) > 1).all()
+    for (content,) in duplicates:
+        q = Question.query.filter_by(content=content).first()
+        issues.append(_issue('duplicate_content', q, 'Duplicate question content'))
+
+    for p in ParsedQuestion.query.filter(ParsedQuestion.confidence < 0.85).all():
+        issues.append({
+            'issue_type': 'low_confidence_import',
+            'parsed_question_id': p.id,
+            'batch_id': p.batch_id,
+            'content': p.content,
+            'confidence': p.confidence,
+            'message': 'Imported question confidence is low'
+        })
+
+    if issue_type:
+        issues = [item for item in issues if item['issue_type'] == issue_type]
+    return jsonify({'issues': issues, 'total': len(issues)})
+
+
 @admin_bp.route('/import/stats', methods=['GET'])
 def admin_import_stats():
     batches = ImportBatch.query.all()
