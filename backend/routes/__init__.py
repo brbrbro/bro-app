@@ -14,9 +14,10 @@ invite_bp = Blueprint('invite', __name__)
 lexicon_bp = Blueprint('lexicon', __name__)
 notification_bp = Blueprint('notification', __name__)
 study_bp = Blueprint('study', __name__)
+admin_bp = Blueprint('admin', __name__)
 
 def register_blueprints(app):
-    from . import questions, shares, sync, users, progress, leaderboard, checkin, exchange, invite, lexicon, notification, study
+    from . import questions, shares, sync, users, progress, leaderboard, checkin, exchange, invite, lexicon, notification, study, admin
     importlib.import_module('.import', 'routes')
     app.register_blueprint(questions_bp, url_prefix='/api/questions')
     app.register_blueprint(users_bp, url_prefix='/api/users')
@@ -31,3 +32,4 @@ def register_blueprints(app):
     app.register_blueprint(lexicon_bp, url_prefix='/api/lexicon')
     app.register_blueprint(notification_bp, url_prefix='/api/notifications')
     app.register_blueprint(study_bp, url_prefix='/api/study')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')

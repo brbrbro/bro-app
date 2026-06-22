@@ -36,4 +36,18 @@ export const splitParsedQuestion = (questionId, data) => api.post(`/import/parse
 export const mergeParsedQuestion = (questionId, targetId) => api.post(`/import/parsed/${questionId}/merge`, { target_id: targetId });
 export const approveSafeQuestions = (batchId, minConfidence = 0.85) => api.post(`/import/batch/${batchId}/approve-safe`, { min_confidence: minConfidence });
 
+export const getAdminBatches = (params = {}) => api.get('/admin/import/batches', { params });
+export const getAdminBatch = (id) => api.get(`/admin/import/batches/${id}`);
+export const deleteAdminBatch = (id) => api.delete(`/admin/import/batches/${id}`);
+export const reparseAdminBatch = (id) => api.post(`/admin/import/batches/${id}/reparse`);
+
+export const getAdminQuestions = (params = {}) => api.get('/admin/questions', { params });
+export const getAdminQuestion = (id) => api.get(`/admin/questions/${id}`);
+export const updateAdminQuestion = (id, data) => api.put(`/admin/questions/${id}`, data);
+export const archiveAdminQuestion = (id) => api.post(`/admin/questions/${id}/archive`);
+export const deleteAdminQuestion = (id) => api.delete(`/admin/questions/${id}`);
+
+export const getQualityIssues = (params = {}) => api.get('/admin/quality/issues', { params });
+export const getImportStats = (params = {}) => api.get('/admin/import/stats', { params });
+
 export default api;
