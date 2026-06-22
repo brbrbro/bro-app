@@ -33,3 +33,6 @@ uploads/
 
 # Worktrees
 .worktrees/
+
+# Local brainstorming artifacts
+.superpowers/
