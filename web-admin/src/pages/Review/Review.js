@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button, Card, Form, Input, List, Select, Space, Tag, message, Modal } from 'antd';
 import { CheckOutlined, CloseOutlined, SaveOutlined, SplitCellsOutlined, MergeCellsOutlined } from '@ant-design/icons';
 import { getBatches, getBatchQuestions, updateParsedQuestion, approveQuestion, rejectQuestion, splitParsedQuestion, mergeParsedQuestion, approveSafeQuestions } from '../../services/api';
@@ -13,8 +14,13 @@ const ReviewPage = () => {
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(null);
   const [form] = Form.useForm();
+  const [searchParams] = useSearchParams();
 
-  useEffect(() => { loadBatches(); }, []);
+  useEffect(() => {
+    const batchId = Number(searchParams.get('batch'));
+    loadBatches();
+    if (batchId) loadQuestions(batchId);
+  }, [searchParams]);
 
   const loadBatches = async () => {
     const res = await getBatches();

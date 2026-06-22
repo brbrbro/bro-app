@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Drawer, Form, Input, Popconfirm, Select, Space, Table, Tag, message } from 'antd';
-import { DeleteOutlined, EditOutlined, SearchOutlined, StopOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EyeOutlined, SearchOutlined, StopOutlined, UndoOutlined } from '@ant-design/icons';
 import { archiveAdminQuestion, deleteAdminQuestion, getAdminQuestions, updateAdminQuestion } from '../../services/api';
 import './QuestionBankOps.css';
 
@@ -11,6 +11,7 @@ const QuestionBankOpsPage = () => {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [detail, setDetail] = useState(null);
   const [current, setCurrent] = useState(null);
   const [filterForm] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -74,6 +75,16 @@ const QuestionBankOpsPage = () => {
     }
   };
 
+  const handleUnarchive = async (id) => {
+    try {
+      await updateAdminQuestion(id, { status: 'approved' });
+      message.success('已恢复');
+      loadQuestions();
+    } catch (e) {
+      message.error(e.response?.data?.error || '恢复失败');
+    }
+  };
+
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
     { title: '科目', dataIndex: 'subject', key: 'subject', width: 100 },
@@ -83,15 +94,20 @@ const QuestionBankOpsPage = () => {
     { title: '难度', dataIndex: 'difficulty', key: 'difficulty', width: 80 },
     { title: '来源', dataIndex: 'source', key: 'source', width: 120 },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: status => <Tag>{status}</Tag> },
+    { title: '做题次数', dataIndex: 'solved_count', key: 'solved_count', width: 100 },
+    { title: '正确率', dataIndex: 'correct_rate', key: 'correct_rate', width: 100, render: value => value === undefined || value === null ? '-' : `${Math.round(Number(value) * 100)}%` },
+    { title: '创建时间', dataIndex: 'created_at', key: 'created_at', width: 180 },
     { title: '内容', dataIndex: 'content', key: 'content', ellipsis: true },
     {
       title: '操作',
       key: 'actions',
-      width: 170,
+      width: 260,
       render: (_, row) => (
         <Space>
+          <Button type="link" icon={<EyeOutlined />} onClick={() => setDetail(row)}>详情</Button>
           <Button type="link" icon={<EditOutlined />} onClick={() => openEditor(row)}>编辑</Button>
-          <Button type="link" icon={<StopOutlined />} onClick={() => handleArchive(row.id)}>下架</Button>
+          {row.status === 'archived' && <Button type="link" icon={<UndoOutlined />} onClick={() => handleUnarchive(row.id)}>恢复</Button>}
+          {row.status !== 'archived' && <Button type="link" icon={<StopOutlined />} onClick={() => handleArchive(row.id)}>下架</Button>}
           <Popconfirm title="确认删除该题？" onConfirm={() => handleDelete(row.id)}>
             <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
@@ -115,9 +131,21 @@ const QuestionBankOpsPage = () => {
             <Option value="unknown">unknown</Option>
           </Select>
         </Form.Item>
+        <Form.Item name="difficulty" label="难度"><Select allowClear placeholder="难度" style={{ width: 100 }}>{[1,2,3,4,5].map(d => <Option key={d} value={d}>{d}</Option>)}</Select></Form.Item>
+        <Form.Item name="source" label="来源"><Input placeholder="来源" style={{ width: 120 }} /></Form.Item>
+        <Form.Item name="status" label="状态">
+          <Select allowClear placeholder="状态" style={{ width: 120 }}>
+            <Option value="approved">approved</Option>
+            <Option value="archived">archived</Option>
+            <Option value="rejected">rejected</Option>
+          </Select>
+        </Form.Item>
         <Form.Item><Button type="primary" htmlType="submit" icon={<SearchOutlined />}>搜索</Button></Form.Item>
       </Form>
-      <Table rowKey="id" columns={columns} dataSource={questions} loading={loading} scroll={{ x: 1300 }} pagination={{ pageSize: 20 }} />
+      <Table rowKey="id" columns={columns} dataSource={questions} loading={loading} scroll={{ x: 1700 }} pagination={{ pageSize: 20 }} />
+      <Drawer title="题目详情" width={640} open={!!detail} onClose={() => setDetail(null)}>
+        <pre>{JSON.stringify(detail, null, 2)}</pre>
+      </Drawer>
       <Drawer title="编辑题目" width={640} open={drawerOpen} onClose={() => setDrawerOpen(false)} extra={<Button type="primary" onClick={handleSave}>保存</Button>}>
         <Form form={editForm} layout="vertical">
           <Form.Item label="题干" name="content" rules={[{ required: true }]}><TextArea rows={5} /></Form.Item>
