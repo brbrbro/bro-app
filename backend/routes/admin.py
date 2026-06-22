@@ -108,6 +108,94 @@ def admin_reparse_import_batch(batch_id):
     return jsonify({'success': False, 'error': 'reparse_requires_worker'}), 400
 
 
+def _question_to_dict(q):
+    return {
+        'id': q.id,
+        'region': q.region,
+        'subject': q.subject,
+        'grade': q.grade,
+        'syllabus': q.syllabus,
+        'knowledge_point': q.knowledge_point,
+        'type': q.type,
+        'difficulty': q.difficulty,
+        'content': q.content,
+        'answer': q.answer,
+        'explanation': q.explanation,
+        'options': json.loads(q.options) if q.options else [],
+        'solved_count': q.solved_count or 0,
+        'correct_rate': q.correct_rate or 0,
+        'source': q.source,
+        'status': q.status,
+        'created_at': q.created_at.isoformat() if q.created_at else ''
+    }
+
+
+@admin_bp.route('/questions', methods=['GET'])
+def admin_questions():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    keyword = request.args.get('keyword')
+    subject = request.args.get('subject')
+    status = request.args.get('status')
+    q = Question.query
+    if keyword:
+        q = q.filter(Question.content.contains(keyword))
+    if subject:
+        q = q.filter_by(subject=subject)
+    if status:
+        q = q.filter_by(status=status)
+    pagination = q.order_by(Question.created_at.desc()).paginate(page=page, per_page=per_page)
+    return jsonify({
+        'questions': [_question_to_dict(question) for question in pagination.items],
+        'total': pagination.total,
+        'page': page,
+        'pages': pagination.pages
+    })
+
+
+@admin_bp.route('/questions/<int:question_id>', methods=['GET'])
+def admin_question_detail(question_id):
+    q = db.session.get(Question, question_id)
+    if not q:
+        return jsonify({'error': 'not_found'}), 404
+    return jsonify({'question': _question_to_dict(q)})
+
+
+@admin_bp.route('/questions/<int:question_id>', methods=['PUT'])
+def admin_update_question(question_id):
+    q = db.session.get(Question, question_id)
+    if not q:
+        return jsonify({'error': 'not_found'}), 404
+    data = request.get_json() or {}
+    for field in ('region', 'subject', 'grade', 'syllabus', 'knowledge_point', 'type', 'difficulty', 'content', 'answer', 'explanation', 'source', 'status'):
+        if field in data:
+            setattr(q, field, data[field])
+    if 'options' in data:
+        q.options = json.dumps(data['options'], ensure_ascii=False)
+    db.session.commit()
+    return jsonify({'question': _question_to_dict(q)})
+
+
+@admin_bp.route('/questions/<int:question_id>', methods=['DELETE'])
+def admin_delete_question(question_id):
+    q = db.session.get(Question, question_id)
+    if not q:
+        return jsonify({'error': 'not_found'}), 404
+    db.session.delete(q)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@admin_bp.route('/questions/<int:question_id>/archive', methods=['POST'])
+def admin_archive_question(question_id):
+    q = db.session.get(Question, question_id)
+    if not q:
+        return jsonify({'error': 'not_found'}), 404
+    q.status = 'archived'
+    db.session.commit()
+    return jsonify({'question': _question_to_dict(q)})
+
+
 @admin_bp.route('/import/stats', methods=['GET'])
 def admin_import_stats():
     batches = ImportBatch.query.all()
