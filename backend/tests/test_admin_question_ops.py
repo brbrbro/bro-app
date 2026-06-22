@@ -127,3 +127,15 @@ def test_admin_quality_detects_duplicate_content(client, app):
     resp = client.get('/api/admin/quality/issues?issue_type=duplicate_content')
     assert resp.status_code == 200
     assert resp.get_json()['issues'][0]['issue_type'] == 'duplicate_content'
+
+
+def test_admin_import_stats_counts_batches(client, app):
+    _make_batch(app, status='reviewing')
+    _make_batch(app, status='completed')
+    resp = client.get('/api/admin/import/stats')
+    assert resp.status_code == 200
+    totals = resp.get_json()['totals']
+    assert totals['batches'] == 2
+    assert totals['parsed_questions'] == 4
+    assert totals['approved_questions'] == 2
+    assert 'by_status' in resp.get_json()
