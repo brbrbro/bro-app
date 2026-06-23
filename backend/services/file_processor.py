@@ -8,9 +8,9 @@ import mammoth  # for Word
 
 class FileProcessor:
     """处理上传的文件，提取文本和图片"""
-    
-    UPLOAD_DIR = '/var/www/bro/uploads'
-    IMAGE_DIR = '/var/www/bro/static/images'
+
+    UPLOAD_DIR = os.environ.get('UPLOAD_DIR') or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
+    IMAGE_DIR = os.environ.get('IMAGE_DIR') or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'images')
     
     def __init__(self):
         os.makedirs(self.UPLOAD_DIR, exist_ok=True)
@@ -34,37 +34,40 @@ class FileProcessor:
         doc = fitz.open(file_path)
         text_content = []
         images = []
-        
-        for page_num in range(len(doc)):
-            page = doc[page_num]
-            text = page.get_text()
-            text_content.append({
-                'page': page_num + 1,
-                'text': text
-            })
-            
-            image_list = page.get_images()
-            for img_index, img in enumerate(image_list, start=1):
-                xref = img[0]
-                base_image = doc.extract_image(xref)
-                image_bytes = base_image["image"]
-                image_ext = base_image["ext"]
-                
-                image_filename = f"pdf_{os.path.basename(file_path)}_p{page_num}_{img_index}.{image_ext}"
-                image_path = os.path.join(self.IMAGE_DIR, image_filename)
-                with open(image_path, "wb") as f:
-                    f.write(image_bytes)
-                
-                images.append({
+
+        try:
+            total_pages = len(doc)
+            for page_num in range(total_pages):
+                page = doc[page_num]
+                text = page.get_text()
+                text_content.append({
                     'page': page_num + 1,
-                    'path': image_path,
-                    'url': f'/static/images/{image_filename}'
+                    'text': text
                 })
-        
-        doc.close()
+
+                image_list = page.get_images()
+                for img_index, img in enumerate(image_list, start=1):
+                    xref = img[0]
+                    base_image = doc.extract_image(xref)
+                    image_bytes = base_image["image"]
+                    image_ext = base_image["ext"]
+
+                    image_filename = f"pdf_{os.path.basename(file_path)}_p{page_num}_{img_index}.{image_ext}"
+                    image_path = os.path.join(self.IMAGE_DIR, image_filename)
+                    with open(image_path, "wb") as f:
+                        f.write(image_bytes)
+
+                    images.append({
+                        'page': page_num + 1,
+                        'path': image_path,
+                        'url': f'/static/images/{image_filename}'
+                    })
+        finally:
+            doc.close()
+
         return {
             'type': 'pdf',
-            'pages': len(doc),
+            'pages': total_pages,
             'text_content': text_content,
             'images': images
         }
