@@ -9,12 +9,24 @@ from services.ai_parser import AIParser
 from services.document_ingestor import DocumentIngestor
 from services.recognition_pipeline import RecognitionPipeline
 from services.question_normalizer import QuestionNormalizer
+from services.answer_explainer import AnswerExplainer
 from . import import_bp
 
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'txt'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def _fill_answer_and_explanation(payload):
+    if payload.get('answer') and payload.get('explanation'):
+        return payload
+    completion = AnswerExplainer().complete(payload)
+    if completion.get('answer'):
+        payload['answer'] = completion['answer']
+    if completion.get('explanation'):
+        payload['explanation'] = completion['explanation']
+    return payload
 
 
 def _parsed_from_payload(batch_id, payload):
@@ -119,6 +131,13 @@ def upload_file():
         questions = ai_parser.batch_parse(result, subject)
         
         for q_data in questions:
+            q_data = _fill_answer_and_explanation({
+                **q_data,
+                'subject': subject,
+                'exam_type': exam_type,
+                'grade': grade,
+                'knowledge_point': knowledge_point
+            })
             parsed = ParsedQuestion(
                 batch_id=batch.id,
                 raw_content=json.dumps(q_data),
@@ -341,7 +360,7 @@ def import_single():
     defaults = {'exam_type': exam_type, 'subject': subject, 'grade': grade, 'knowledge_point': knowledge_point}
     for candidate in candidates:
         payload = normalizer.to_parsed_payload(candidate, defaults)
-        parsed = _parsed_from_payload(batch.id, payload)
+        parsed = _parsed_from_payload(batch.id, _fill_answer_and_explanation(payload))
         db.session.add(parsed)
         parsed_items.append(parsed)
 
@@ -401,7 +420,7 @@ def import_batch():
         parsed_items = []
         for candidate in candidates:
             payload = normalizer.to_parsed_payload(candidate, defaults)
-            parsed = _parsed_from_payload(batch.id, payload)
+            parsed = _parsed_from_payload(batch.id, _fill_answer_and_explanation(payload))
             db.session.add(parsed)
             parsed_items.append(parsed)
 

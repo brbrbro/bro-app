@@ -143,8 +143,35 @@ const QuestionBankOpsPage = () => {
         <Form.Item><Button type="primary" htmlType="submit" icon={<SearchOutlined />}>搜索</Button></Form.Item>
       </Form>
       <Table rowKey="id" columns={columns} dataSource={questions} loading={loading} scroll={{ x: 1700 }} pagination={{ pageSize: 20 }} />
-      <Drawer title="题目详情" width={640} open={!!detail} onClose={() => setDetail(null)}>
-        <pre>{JSON.stringify(detail, null, 2)}</pre>
+      <Drawer title="题目详情" width={720} open={!!detail} onClose={() => setDetail(null)}>
+        {detail && <div className="question-detail">
+          <Card size="small" title="题干" className="detail-card">
+            <div className="detail-content">{detail.content || '—'}</div>
+          </Card>
+          <Card size="small" title="答案" className="detail-card">
+            <div className="detail-answer">{detail.answer || '—'}</div>
+          </Card>
+          <Card size="small" title="解析" className="detail-card">
+            <div className="detail-explanation">{detail.explanation || '—'}</div>
+          </Card>
+          {Array.isArray(detail.options) && detail.options.length > 0 && <Card size="small" title="选项" className="detail-card">
+            {detail.options.map((option, index) => (
+              <div key={index} className="detail-option">
+                {typeof option === 'string' ? option : `${option.key || ''}. ${option.text || ''}`}
+              </div>
+            ))}
+          </Card>}
+          <Card size="small" title="基础信息" className="detail-card">
+            <Space wrap>
+              <Tag>科目：{detail.subject || '—'}</Tag>
+              <Tag>年级：{detail.grade || '—'}</Tag>
+              <Tag>知识点：{detail.knowledge_point || '—'}</Tag>
+              <Tag>题型：{detail.type || '—'}</Tag>
+              <Tag>难度：{detail.difficulty || '—'}</Tag>
+              <Tag>状态：{detail.status || '—'}</Tag>
+            </Space>
+          </Card>
+        </div>}
       </Drawer>
       <Drawer title="编辑题目" width={640} open={drawerOpen} onClose={() => setDrawerOpen(false)} extra={<Button type="primary" onClick={handleSave}>保存</Button>}>
         <Form form={editForm} layout="vertical">

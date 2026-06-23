@@ -33,6 +33,26 @@ def test_single_text_import_creates_one_parsed_question(client):
     assert 'confidence_detail' in question
 
 
+def test_single_import_fills_missing_answer_and_explanation(client, monkeypatch):
+    from services.answer_explainer import AnswerExplainer
+
+    def fake_complete(self, question):
+        return {'answer': '2', 'explanation': '1+1 等于 2。'}
+
+    monkeypatch.setattr(AnswerExplainer, 'complete', fake_complete)
+    resp = client.post('/api/import/single', json={
+        'text': '1. 1+1=?',
+        'exam_type': 'gaokao',
+        'subject': '数学',
+        'grade': '高一',
+        'knowledge_point': '计算'
+    })
+    assert resp.status_code == 200
+    question = resp.get_json()['questions'][0]
+    assert question['answer'] == '2'
+    assert question['explanation'] == '1+1 等于 2。'
+
+
 def test_single_import_requires_subject(client):
     resp = client.post('/api/import/single', json={'text': '1. hi'})
     assert resp.status_code == 400

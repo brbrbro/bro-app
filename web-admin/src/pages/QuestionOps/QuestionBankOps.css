@@ -1,2 +1,8 @@
 .ops-card { min-height: 70vh; }
 .ops-filter { margin-bottom: 16px; row-gap: 12px; }
+.question-detail { display: flex; flex-direction: column; gap: 16px; }
+.detail-card { border-radius: 8px; }
+.detail-content, .detail-answer, .detail-explanation { white-space: pre-wrap; line-height: 1.7; font-size: 15px; }
+.detail-answer { color: #1677ff; font-weight: 600; }
+.detail-option { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+.detail-option:last-child { border-bottom: none; }
