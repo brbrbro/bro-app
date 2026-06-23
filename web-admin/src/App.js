@@ -23,6 +23,11 @@ const menuItems = [
     label: '题库运营',
     children: [
       {
+        key: '/import',
+        icon: <UploadOutlined />,
+        label: <Link to="/import">题目导入</Link>
+      },
+      {
         key: '/ops/import-batches',
         icon: <UploadOutlined />,
         label: <Link to="/ops/import-batches">导入批次</Link>
@@ -55,8 +60,7 @@ const AppLayout = () => {
   const location = useLocation();
   const selectedKey = location.pathname === '/review' ? '/ops/review'
     : location.pathname === '/bank' ? '/ops/questions'
-      : location.pathname === '/import' ? '/ops/import-batches'
-        : location.pathname;
+      : location.pathname;
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
