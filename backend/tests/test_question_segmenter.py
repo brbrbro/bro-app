@@ -63,3 +63,33 @@ def test_options_support_lowercase_and_fullwidth_letters():
     candidates = QuestionSegmenter().segment([DocumentPage(page=1, text=text)])
     keys = [opt['key'] for opt in candidates[0].options]
     assert keys == ['A', 'B', 'C']
+
+
+def test_answer_section_at_end_of_paper_is_merged_back_to_question():
+    question_page = (
+        '1. 以下哪項關於細胞膜「流動鑲嵌模型」的描述是正確的？\n'
+        'A. 磷脂分子是固定的，而蛋白質分子可以橫向移動\n'
+        'B. 細胞膜的流動性主要由膽固醇與磷脂的相互作用維持\n'
+        'C. 蛋白質分子均勻地分佈在膜的表面\n'
+        'D. 只有水分子能透過簡單擴散穿過磷脂雙分子層\n'
+        '\n2. 第二題題幹\n'
+        'A. 甲\nB. 乙\nC. 丙\nD. 丁\n'
+    )
+    answer_page = (
+        '1. 答案：B\n'
+        '解析：磷脂雙分子層具有流動性（非固定）。\n'
+        '\n2. 答案：A\n'
+        '解析：第二題解析。\n'
+    )
+    candidates = QuestionSegmenter().segment([
+        DocumentPage(page=1, text=question_page),
+        DocumentPage(page=5, text=answer_page)
+    ])
+    assert len(candidates) == 2
+    first, second = candidates
+    assert first.content.startswith('以下哪項關於細胞膜')
+    assert '答案' not in first.content
+    assert first.answer == 'B'
+    assert first.explanation.startswith('磷脂雙分子層具有流動性')
+    assert second.answer == 'A'
+    assert second.explanation.startswith('第二題解析')
