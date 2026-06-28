@@ -38,6 +38,27 @@ def test_pipeline_preserves_page_order_for_mixed_pages():
     assert [c.source_page for c in candidates] == [1, 2, 3]
 
 
+def test_pipeline_merges_late_answer_key_page_by_question_number():
+    question_page = (
+        '1. 以下哪項關於細胞膜「流動鑲嵌模型」的描述是正確的？\n'
+        'A. 磷脂分子是固定的，而蛋白質分子可以橫向移動\n'
+        'B. 細胞膜的流動性主要由膽固醇與磷脂的相互作用維持\n'
+        'C. 蛋白質分子均勻地分佈在膜的表面\n'
+        'D. 只有水分子能透過簡單擴散穿過磷脂雙分子層\n'
+    )
+    answer_page = (
+        '1. 答案： B\n'
+        '解析：磷脂雙分子層具有流動性（非固定）；蛋白質是不規則分佈的。\n'
+    )
+    candidates = RecognitionPipeline().recognize([
+        DocumentPage(page=1, text=question_page),
+        DocumentPage(page=10, text=answer_page)
+    ])
+    assert len(candidates) == 1
+    assert candidates[0].answer == 'B'
+    assert candidates[0].explanation.startswith('磷脂雙分子層具有流動性')
+
+
 def test_normalizer_prepares_parsed_question_payload():
     from services.import_schema import QuestionCandidate, FormulaAsset
     from services.question_normalizer import QuestionNormalizer
