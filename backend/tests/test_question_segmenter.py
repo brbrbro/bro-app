@@ -93,3 +93,33 @@ def test_answer_section_at_end_of_paper_is_merged_back_to_question():
     assert first.explanation.startswith('磷脂雙分子層具有流動性')
     assert second.answer == 'A'
     assert second.explanation.startswith('第二題解析')
+
+
+def test_chinese_numbered_answer_key_page_is_merged_and_not_counted_as_question():
+    question_page = (
+        '21. 運動時，呼吸速率增加的主要刺激因素是：\n'
+        'A. 血液中氧氣濃度下降\n'
+        'B. 血液中二氧化碳濃度上升\n'
+        'C. 肌肉中乳酸堆積\n'
+        'D. 體溫上升\n'
+        '\n22. 膽汁不含酶，但它在消化脂肪中的作用是：\n'
+        'A. 將脂肪水解為甘油\n'
+        'B. 乳化脂肪以增加表面積\n'
+        'C. 中和胃酸以活化胃蛋白酶\n'
+    )
+    answer_page = (
+        '第 21 題 答案：B\n'
+        '解析：延髓的化學感受器對血液 pH 值（由 CO2 引起）最敏感。\n'
+        '第 22 題 答案：B\n'
+        '解析：乳化作用是物理消化，輔助脂肪酶工作。\n'
+    )
+    candidates = QuestionSegmenter().segment([
+        DocumentPage(page=4, text=question_page),
+        DocumentPage(page=12, text=answer_page)
+    ])
+    assert len(candidates) == 2
+    assert candidates[0].answer == 'B'
+    assert candidates[0].explanation.startswith('延髓的化學感受器')
+    assert candidates[1].answer == 'B'
+    assert candidates[1].explanation.startswith('乳化作用是物理消化')
+    assert all('第 21 題' not in candidate.content for candidate in candidates)

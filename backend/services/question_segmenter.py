@@ -2,8 +2,8 @@ import re
 from services.import_schema import QuestionCandidate
 
 
-QUESTION_SPLIT_RE = re.compile(r'(?:^|\n)\s*(\d+)[\.、．]\s*')
-LEADING_NUMBER_RE = re.compile(r'^\s*(\d+)[\.、．]\s*')
+QUESTION_SPLIT_RE = re.compile(r'(?:^|\n)\s*(?:(\d+)[\.、．]|第\s*(\d+)\s*[題题])\s*')
+LEADING_NUMBER_RE = re.compile(r'^\s*(?:(\d+)[\.、．]|第\s*(\d+)\s*[題题])\s*')
 OPTION_RE = re.compile(r'^\s*([A-Fa-fＡ-Ｆａ-ｆ])\s*[\.、．]?\s*(.+)$', re.MULTILINE)
 ANSWER_RE = re.compile(r'(?:答案|Answer)\s*[:：]\s*([^\n解析]+)')
 EXPLANATION_RE = re.compile(r'(?:解析|Explanation)\s*[:：]\s*([\s\S]+)$')
@@ -55,7 +55,7 @@ class QuestionSegmenter:
             if not stripped:
                 return []
             number_match = LEADING_NUMBER_RE.match(stripped)
-            number = int(number_match.group(1)) if number_match else None
+            number = self._match_number(number_match) if number_match else None
             return [(number, stripped)]
 
         parts = []
@@ -65,8 +65,13 @@ class QuestionSegmenter:
             chunk = text[start:end].strip()
             if not chunk:
                 continue
-            parts.append((int(match.group(1)), chunk))
+            parts.append((self._match_number(match), chunk))
         return parts
+
+    def _match_number(self, match):
+        if not match:
+            return None
+        return int(match.group(1) or match.group(2))
 
     def _is_answer_block(self, raw):
         body = LEADING_NUMBER_RE.sub('', raw).strip()
