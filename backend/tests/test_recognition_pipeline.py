@@ -59,6 +59,30 @@ def test_pipeline_merges_late_answer_key_page_by_question_number():
     assert candidates[0].explanation.startswith('磷脂雙分子層具有流動性')
 
 
+def test_pipeline_turns_image_parser_results_into_question_candidates():
+    from services.import_schema import ImageAsset
+
+    class FakeImageParser:
+        def parse_image(self, path, subject=''):
+            assert path == '/tmp/q.png'
+            assert subject == '生物'
+            return [{
+                'content': '圖片中的題目？',
+                'options': [{'key': 'A', 'text': '甲'}, {'key': 'B', 'text': '乙'}],
+                'answer': 'B',
+                'explanation': '圖片識別解析',
+                'type': 'choice',
+                'difficulty': 2
+            }]
+
+    pages = [DocumentPage(page=3, text='', images=[ImageAsset(path='/tmp/q.png', url='/static/q.png', image_type='source_image')])]
+    candidates = RecognitionPipeline(image_parser=FakeImageParser()).recognize(pages, subject='生物')
+    assert len(candidates) == 1
+    assert candidates[0].content == '圖片中的題目？'
+    assert candidates[0].answer == 'B'
+    assert candidates[0].images[0].url == '/static/q.png'
+
+
 def test_normalizer_prepares_parsed_question_payload():
     from services.import_schema import QuestionCandidate, FormulaAsset
     from services.question_normalizer import QuestionNormalizer

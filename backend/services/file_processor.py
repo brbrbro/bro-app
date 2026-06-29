@@ -46,6 +46,7 @@ class FileProcessor:
                 })
 
                 image_list = page.get_images()
+                page_image_count = 0
                 for img_index, img in enumerate(image_list, start=1):
                     xref = img[0]
                     base_image = doc.extract_image(xref)
@@ -61,6 +62,18 @@ class FileProcessor:
                         'page': page_num + 1,
                         'path': image_path,
                         'url': f'/static/images/{image_filename}'
+                    })
+                    page_image_count += 1
+
+                if not text.strip() and page_image_count == 0:
+                    render_filename = f"pdf_{os.path.basename(file_path)}_p{page_num}_render.png"
+                    render_path = os.path.join(self.IMAGE_DIR, render_filename)
+                    pix = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
+                    pix.save(render_path)
+                    images.append({
+                        'page': page_num + 1,
+                        'path': render_path,
+                        'url': f'/static/images/{render_filename}'
                     })
         finally:
             doc.close()
