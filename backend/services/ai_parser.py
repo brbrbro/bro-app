@@ -8,13 +8,23 @@ class AIParser:
     """使用 AI 识别和解析题目"""
     
     def __init__(self):
-        self.api_key = os.environ.get('OPENAI_API_KEY', '')
+        self.provider = os.environ.get('AI_PROVIDER', 'openai').lower()
+        if self.provider == 'ark':
+            self.api_key = os.environ.get('ARK_API_KEY', '')
+            self.base_url = os.environ.get('ARK_BASE_URL', 'https://ark.cn-beijing.volces.com/api/v3')
+            self.model = os.environ.get('ARK_MODEL', 'GLM-5.2')
+        else:
+            self.api_key = os.environ.get('OPENAI_API_KEY', '')
+            self.base_url = None
+            self.model = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
         self.client = None
-        self.model = 'gpt-4-vision-preview'
     
     def _get_client(self):
         if not self.client and self.api_key:
-            self.client = OpenAI(api_key=self.api_key)
+            if self.base_url:
+                self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+            else:
+                self.client = OpenAI(api_key=self.api_key)
         return self.client
     
     def parse_text(self, text: str, subject: str = '') -> List[Dict[str, Any]]:
@@ -88,17 +98,17 @@ class AIParser:
                     {
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": f"请识别图片中的题目，科目：{subject or '未指定'}。按 JSON 格式返回题目内容、选项、答案、解析。"},
+                            {"type": "text", "text": f"请识别图片中的题目，科目：{subject or '未指定'}。按 JSON 数组格式返回题目内容、选项、答案、解析、题型、难度。只返回 JSON，不要解释。"},
                             {
                                 "type": "image_url",
                                 "image_url": {
-                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                    "url": f"data:image/png;base64,{base64_image}"
                                 }
                             }
                         ]
                     }
                 ],
-                max_tokens=2000
+                max_tokens=4000
             )
             
             content = response.choices[0].message.content
