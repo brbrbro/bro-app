@@ -2,8 +2,8 @@ import re
 from services.import_schema import QuestionCandidate
 
 
-QUESTION_SPLIT_RE = re.compile(r'(?:^|\n)\s*(?:(\d+)[\.、．]|第\s*(\d+)\s*[題题])\s*')
-LEADING_NUMBER_RE = re.compile(r'^\s*(?:(\d+)[\.、．]|第\s*(\d+)\s*[題题])\s*')
+QUESTION_SPLIT_RE = re.compile(r'(?:^|\n)[ \t]*(?:(\d+)[\.、．]|第[ \t]*(\d+)[ \t]*[題题])[ \t]*')
+LEADING_NUMBER_RE = re.compile(r'^[ \t]*(?:(\d+)[\.、．]|第[ \t]*(\d+)[ \t]*[題题])[ \t]*')
 OPTION_RE = re.compile(r'^\s*([A-Fa-fＡ-Ｆａ-ｆ])\s*[\.、．]?\s*(.+)$', re.MULTILINE)
 ANSWER_RE = re.compile(r'(?:答案|Answer)\s*[:：]\s*([^\n解析]+)')
 EXPLANATION_RE = re.compile(r'(?:解析|Explanation)\s*[:：]\s*([\s\S]+)$')

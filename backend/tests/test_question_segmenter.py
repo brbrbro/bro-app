@@ -123,3 +123,11 @@ def test_chinese_numbered_answer_key_page_is_merged_and_not_counted_as_question(
     assert candidates[1].answer == 'B'
     assert candidates[1].explanation.startswith('乳化作用是物理消化')
     assert all('第 21 題' not in candidate.content for candidate in candidates)
+
+
+def test_stray_duplicate_question_number_line_is_removed_from_content():
+    text = '63.\n1. 正式題干內容\nA. 甲\nB. 乙\n答案：A'
+    candidates = QuestionSegmenter().segment([DocumentPage(page=1, text=text)])
+    assert len(candidates) == 1
+    assert candidates[0].content.startswith('正式題干內容')
+    assert '63.' not in candidates[0].content
