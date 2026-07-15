@@ -15,12 +15,15 @@ const QuestionBankOpsPage = () => {
   const [current, setCurrent] = useState(null);
   const [filterForm] = Form.useForm();
   const [editForm] = Form.useForm();
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
 
-  const loadQuestions = async () => {
+  const loadQuestions = async (page = pagination.current, pageSize = pagination.pageSize) => {
     setLoading(true);
     try {
-      const res = await getAdminQuestions(filterForm.getFieldsValue());
+      const filters = filterForm.getFieldsValue();
+      const res = await getAdminQuestions({ ...filters, page, per_page: pageSize });
       setQuestions(res.data.questions || res.data.items || []);
+      setPagination({ current: page, pageSize, total: res.data.total || 0 });
     } catch (e) {
       message.error(e.response?.data?.error || '加载题库失败');
     } finally {
@@ -28,7 +31,11 @@ const QuestionBankOpsPage = () => {
     }
   };
 
-  useEffect(() => { loadQuestions(); }, []);
+  useEffect(() => { loadQuestions(1); }, []);
+
+  const handleTableChange = (pag) => {
+    loadQuestions(pag.current, pag.pageSize);
+  };
 
   const openEditor = (question) => {
     setCurrent(question);
@@ -140,9 +147,9 @@ const QuestionBankOpsPage = () => {
             <Option value="rejected">rejected</Option>
           </Select>
         </Form.Item>
-        <Form.Item><Button type="primary" htmlType="submit" icon={<SearchOutlined />}>搜索</Button></Form.Item>
+        <Form.Item><Button type="primary" htmlType="submit" icon={<SearchOutlined />} onClick={() => loadQuestions(1)}>搜索</Button></Form.Item>
       </Form>
-      <Table rowKey="id" columns={columns} dataSource={questions} loading={loading} scroll={{ x: 1700 }} pagination={{ pageSize: 20 }} />
+      <Table rowKey="id" columns={columns} dataSource={questions} loading={loading} scroll={{ x: 1700 }} pagination={{ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showSizeChanger: true, showTotal: (t) => `共 ${t} 题` }} onChange={handleTableChange} />
       <Drawer title="题目详情" width={720} open={!!detail} onClose={() => setDetail(null)}>
         {detail && <div className="question-detail">
           <Card size="small" title="题干" className="detail-card">
