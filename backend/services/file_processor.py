@@ -65,10 +65,10 @@ class FileProcessor:
                     })
                     page_image_count += 1
 
-                if not text.strip() and page_image_count == 0:
+                if not text.strip():
                     render_filename = f"pdf_{os.path.basename(file_path)}_p{page_num}_render.png"
                     render_path = os.path.join(self.IMAGE_DIR, render_filename)
-                    pix = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
+                    pix = page.get_pixmap(matrix=fitz.Matrix(3, 3), alpha=False)
                     pix.save(render_path)
                     images.append({
                         'page': page_num + 1,

@@ -4,7 +4,7 @@ from services.question_segmenter import QuestionSegmenter
 from services.ai_parser import AIParser
 
 
-def _try_ocr(image_path, lang='chi_sim+chi_tra+eng'):
+def _try_ocr(image_path, lang='chi_tra+eng'):
     try:
         import pytesseract
         from PIL import Image
@@ -13,11 +13,9 @@ def _try_ocr(image_path, lang='chi_sim+chi_tra+eng'):
             r'C:\Program Files\Tesseract-OCR\tesseract.exe'
         )
         tessdata_prefix = os.environ.get('TESSDATA_PREFIX')
-        if tessdata_prefix:
-            with Image.open(image_path) as img:
-                return pytesseract.image_to_string(img, lang=lang, config=f'--tessdata-dir "{tessdata_prefix}"')
+        config = f'--tessdata-dir "{tessdata_prefix}" --psm 6' if tessdata_prefix else '--psm 6'
         with Image.open(image_path) as img:
-            return pytesseract.image_to_string(img, lang=lang)
+            return pytesseract.image_to_string(img, lang=lang, config=config)
     except Exception as e:
         print(f"OCR error: {e}")
         return ''
