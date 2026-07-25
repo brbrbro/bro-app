@@ -115,6 +115,25 @@ const ReviewPage = () => {
     loadQuestions(selectedBatch);
   };
 
+  const rejectAll = async () => {
+    if (!selectedBatch || questions.length === 0) return;
+    Modal.confirm({
+      title: '批量驳回',
+      content: `将驳回当前批次全部 ${questions.length} 道待审核题，确定吗？`,
+      onOk: async () => {
+        let count = 0;
+        for (const q of questions) {
+          try {
+            await rejectQuestion(q.id, { notes: '批量驳回' });
+            count++;
+          } catch (e) { }
+        }
+        message.success(`已批量驳回 ${count} 题`);
+        loadQuestions(selectedBatch);
+      }
+    });
+  };
+
   return (
     <div className="review-workspace">
       <aside className="review-left">
@@ -130,7 +149,7 @@ const ReviewPage = () => {
           />
         </Card>
 
-        {selectedBatch && <Card title={`题目列表 (${questions.length})`} size="small" className="question-list-card" extra={<Button size="small" onClick={approveSafe}>高置信批量通过</Button>}>
+        {selectedBatch && <Card title={`题目列表 (${questions.length})`} size="small" className="question-list-card" extra={<Space><Button size="small" type="primary" onClick={approveSafe}>高置信批量通过</Button><Button size="small" danger onClick={rejectAll}>批量驳回</Button></Space>}>
           <List
             dataSource={questions}
             renderItem={(q, i) => (
