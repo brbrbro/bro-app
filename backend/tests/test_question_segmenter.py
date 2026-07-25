@@ -29,13 +29,11 @@ D. 8
     assert candidates[1].answer == 'C'
 
 
-def test_segment_blank_question():
+def test_segment_blank_question_is_filtered_as_non_choice():
     text = '1. 等差数列 a1=1, d=2，则 a10=___\n答案：19\n解析：公式代入。'
     pages = [DocumentPage(page=1, text=text)]
     candidates = QuestionSegmenter().segment(pages)
-    assert len(candidates) == 1
-    assert candidates[0].question_type == 'blank'
-    assert candidates[0].answer == '19'
+    assert len(candidates) == 0
 
 
 def test_segment_keeps_source_page():
@@ -46,7 +44,7 @@ def test_segment_keeps_source_page():
 
 
 def test_raw_ocr_text_keeps_original_question_number():
-    text = '12. 求 x 的值\n答案：x=1'
+    text = '12. 求 x 的值\nA. 1\nB. 2\n答案：A'
     candidates = QuestionSegmenter().segment([DocumentPage(page=1, text=text)])
     assert candidates[0].raw_ocr_text.startswith('12.')
 
@@ -131,3 +129,33 @@ def test_stray_duplicate_question_number_line_is_removed_from_content():
     assert len(candidates) == 1
     assert candidates[0].content.startswith('正式題干內容')
     assert '63.' not in candidates[0].content
+
+
+def test_content_before_section_a_is_skipped():
+    pages = [
+        DocumentPage(page=1, text='考試須知\n請考生遵守考場紀律\n不可使用計算機'),
+        DocumentPage(page=2, text='甲部\n1. 第一題\nA. 甲\nB. 乙\n答案：A'),
+    ]
+    candidates = QuestionSegmenter().segment(pages)
+    assert len(candidates) == 1
+    assert candidates[0].content.startswith('第一題')
+
+
+def test_content_after_section_b_is_skipped():
+    pages = [
+        DocumentPage(page=1, text='甲部\n1. 選擇題\nA. 甲\nB. 乙\n答案：A'),
+        DocumentPage(page=2, text='乙部\n2. 簡答題\n請回答以下問題'),
+    ]
+    candidates = QuestionSegmenter().segment(pages)
+    assert len(candidates) == 1
+
+
+def test_answer_key_with_correct_rate_is_parsed():
+    pages = [
+        DocumentPage(page=1, text='甲部\n1. 第一題\nA. 甲\nB. 乙\n答案：A'),
+        DocumentPage(page=59, text='評卷參考\n1. A (85%)\n2. B (72%)'),
+    ]
+    candidates = QuestionSegmenter().segment(pages)
+    assert len(candidates) == 1
+    assert candidates[0].answer == 'A'
+    assert candidates[0].confidence_detail.get('correct_rate') == 0.85

@@ -11,7 +11,7 @@ def test_parse_ai_questions_json_strips_markdown_fence():
 
 
 def test_pipeline_segments_text_without_ai():
-    pages = [DocumentPage(page=1, text='1. 1+1=?\n答案：2')]
+    pages = [DocumentPage(page=1, text='1. 1+1=?\nA. 1\nB. 2\n答案：2')]
     candidates = RecognitionPipeline().recognize(pages, subject='数学')
     assert len(candidates) == 1
     assert candidates[0].answer == '2'
@@ -30,9 +30,9 @@ def test_pipeline_preserves_page_order_for_mixed_pages():
     from services.import_schema import ImageAsset
 
     pages = [
-        DocumentPage(page=1, text='1. 第一题\n答案：A'),
+        DocumentPage(page=1, text='1. 第一题\nA. 甲\nB. 乙\n答案：A'),
         DocumentPage(page=2, text='', images=[ImageAsset(path='img.png', url='/img.png', image_type='source_image')]),
-        DocumentPage(page=3, text='2. 第三页题\n答案：B')
+        DocumentPage(page=3, text='2. 第三页题\nA. 丙\nB. 丁\n答案：B')
     ]
     candidates = RecognitionPipeline().recognize(pages)
     assert [c.source_page for c in candidates] == [1, 2, 3]

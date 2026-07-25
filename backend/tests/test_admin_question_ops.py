@@ -67,7 +67,7 @@ def test_admin_reparse_missing_source_returns_400(client, app):
 def test_admin_reparse_existing_source_creates_parsed_questions(client, app, tmp_path):
     from models import db, ImportBatch, ParsedQuestion
     source = tmp_path / 'questions.txt'
-    source.write_text('1. 1+1=?\n答案：2', encoding='utf-8')
+    source.write_text('1. 1+1=?\nA. 1\nB. 2\n答案：2', encoding='utf-8')
     with app.app_context():
         batch = ImportBatch(
             source_type='txt', source_file='questions.txt', source_url=str(source), status='completed',

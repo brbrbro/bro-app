@@ -3,7 +3,7 @@ import io
 
 def test_single_text_import_creates_one_parsed_question(client):
     resp = client.post('/api/import/single', json={
-        'text': '1. 1+1=?\n答案：2',
+        'text': '1. 1+1=?\nA. 1\nB. 2\n答案：2',
         'exam_type': 'gaokao',
         'subject': '数学',
         'grade': '高一',
@@ -41,7 +41,7 @@ def test_single_import_fills_missing_answer_and_explanation(client, monkeypatch)
 
     monkeypatch.setattr(AnswerExplainer, 'complete', fake_complete)
     resp = client.post('/api/import/single', json={
-        'text': '1. 1+1=?',
+        'text': '1. 1+1=?\nA. 1\nB. 2',
         'exam_type': 'gaokao',
         'subject': '数学',
         'grade': '高一',
@@ -59,7 +59,7 @@ def test_single_import_requires_subject(client):
 
 
 def test_batch_txt_import_creates_batch_and_questions(client):
-    sample = '1. 1+1=?\n答案：2\n\n2. 2+2=?\n答案：4'
+    sample = '1. 1+1=?\nA. 1\nB. 2\n答案：2\n\n2. 2+2=?\nA. 3\nB. 4\n答案：4'
     data = {
         'file': (io.BytesIO(sample.encode('utf-8')), 'questions.txt'),
         'exam_type': 'gaokao',
