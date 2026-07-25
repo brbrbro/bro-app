@@ -1,7 +1,15 @@
 import os
-from services.import_schema import QuestionCandidate
+import re
+from services.import_schema import QuestionCandidate, DocumentPage
 from services.question_segmenter import QuestionSegmenter
 from services.ai_parser import AIParser
+
+
+def _clean_ocr_text(text):
+    text = re.sub(r'([\u4e00-\u9fff])\s+([\u4e00-\u9fff])', r'\1\2', text)
+    while re.search(r'([\u4e00-\u9fff])\s+([\u4e00-\u9fff])', text):
+        text = re.sub(r'([\u4e00-\u9fff])\s+([\u4e00-\u9fff])', r'\1\2', text)
+    return text
 
 
 def _try_ocr(image_path, lang='chi_tra+eng'):
@@ -15,7 +23,8 @@ def _try_ocr(image_path, lang='chi_tra+eng'):
         tessdata_prefix = os.environ.get('TESSDATA_PREFIX')
         config = f'--tessdata-dir "{tessdata_prefix}" --psm 6' if tessdata_prefix else '--psm 6'
         with Image.open(image_path) as img:
-            return pytesseract.image_to_string(img, lang=lang, config=config)
+            raw = pytesseract.image_to_string(img, lang=lang, config=config)
+            return _clean_ocr_text(raw)
     except Exception as e:
         print(f"OCR error: {e}")
         return ''
@@ -42,7 +51,7 @@ class RecognitionPipeline:
             for image in page.images:
                 ocr_text += _try_ocr(image.path) + '\n'
             if ocr_text.strip():
-                text_pages.append(__import__('services.import_schema', fromlist=['DocumentPage']).DocumentPage(
+                text_pages.append(DocumentPage(
                     page=page.page,
                     text=ocr_text,
                     images=page.images
