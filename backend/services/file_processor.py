@@ -40,32 +40,24 @@ class FileProcessor:
             for page_num in range(total_pages):
                 page = doc[page_num]
                 text = page.get_text()
-                text_content.append({
-                    'page': page_num + 1,
-                    'text': text
-                })
 
-                image_list = page.get_images()
-                page_image_count = 0
-                for img_index, img in enumerate(image_list, start=1):
-                    xref = img[0]
-                    base_image = doc.extract_image(xref)
-                    image_bytes = base_image["image"]
-                    image_ext = base_image["ext"]
-
-                    image_filename = f"pdf_{os.path.basename(file_path)}_p{page_num}_{img_index}.{image_ext}"
-                    image_path = os.path.join(self.IMAGE_DIR, image_filename)
-                    with open(image_path, "wb") as f:
-                        f.write(image_bytes)
-
-                    images.append({
-                        'page': page_num + 1,
-                        'path': image_path,
-                        'url': f'/static/images/{image_filename}'
-                    })
-                    page_image_count += 1
-
-                if not text.strip():
+                if text.strip():
+                    image_list = page.get_images()
+                    for img_index, img in enumerate(image_list, start=1):
+                        xref = img[0]
+                        base_image = doc.extract_image(xref)
+                        image_bytes = base_image["image"]
+                        image_ext = base_image["ext"]
+                        image_filename = f"pdf_{os.path.basename(file_path)}_p{page_num}_embed_{img_index}.{image_ext}"
+                        image_path = os.path.join(self.IMAGE_DIR, image_filename)
+                        with open(image_path, "wb") as f:
+                            f.write(image_bytes)
+                        images.append({
+                            'page': page_num + 1,
+                            'path': image_path,
+                            'url': f'/static/images/{image_filename}'
+                        })
+                else:
                     render_filename = f"pdf_{os.path.basename(file_path)}_p{page_num}_render.png"
                     render_path = os.path.join(self.IMAGE_DIR, render_filename)
                     pix = page.get_pixmap(matrix=fitz.Matrix(3, 3), alpha=False)
@@ -75,6 +67,11 @@ class FileProcessor:
                         'path': render_path,
                         'url': f'/static/images/{render_filename}'
                     })
+
+                text_content.append({
+                    'page': page_num + 1,
+                    'text': text
+                })
         finally:
             doc.close()
 
